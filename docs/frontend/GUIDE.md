@@ -5,7 +5,6 @@
 ## 目录
 
 - [技术栈](#技术栈)
-- [项目结构](#项目结构)
 - [开发规范](#开发规范)
 - [组件开发](#组件开发)
 - [状态管理](#状态管理)
@@ -22,6 +21,7 @@
 - Pinia
 - Vue Router
 - Element Plus
+- UnoCSS
 - Axios
 - Vitest
 - ESLint + Prettier
@@ -31,20 +31,25 @@
 ```
 frontend/
 ├── src/
-│   ├── assets/        # 静态资源
-│   ├── components/    # 通用组件
-│   ├── composables/   # 组合式函数
-│   ├── layouts/       # 布局组件
-│   ├── pages/         # 页面组件
-│   ├── router/        # 路由配置
-│   ├── stores/        # 状态管理
-│   ├── types/         # TypeScript 类型
-│   ├── utils/         # 工具函数
-│   ├── App.vue        # 根组件
-│   └── main.ts        # 入口文件
-├── public/            # 公共资源
-├── tests/             # 测试文件
-└── vite.config.ts     # Vite 配置
+│   ├── assets/          # 静态资源
+│   ├── components/      # Vue组件
+│   ├── hooks/           # 自定义Hooks
+│   ├── layouts/         # 布局组件
+│   ├── pages/           # 页面组件
+│   ├── router/          # 路由配置
+│   ├── services/        # API服务
+│   ├── stores/          # 状态管理
+│   ├── styles/          # 全局样式
+│   ├── types/           # TypeScript类型
+│   ├── utils/           # 工具函数
+│   ├── App.vue          # 根组件
+│   └── main.ts          # 入口文件
+├── public/              # 公共资源
+├── .vscode/             # VSCode配置
+├── .eslintrc.cjs        # ESLint配置
+├── .prettierrc.json     # Prettier配置
+├── uno.config.ts        # UnoCSS配置
+└── vite.config.ts       # Vite配置
 ```
 
 ## 开发规范

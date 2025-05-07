@@ -2,6 +2,17 @@
 
 本文档详细说明前端项目的环境配置系统，包括环境变量、构建配置和开发工具设置。
 
+## 目录
+
+- [环境类型](#环境类型)
+- [环境变量配置](#环境变量配置)
+- [构建配置](#构建配置)
+- [开发工具配置](#开发工具配置)
+- [环境变量使用](#环境变量使用)
+- [环境切换](#环境切换)
+- [常见问题](#常见问题)
+- [最佳实践](#最佳实践)
+
 ## 环境类型
 
 前端项目使用以下环境配置：
@@ -64,13 +75,17 @@ VITE_ENABLE_ERROR_TRACKING=true
 // vite.config.ts
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import UnoCSS from 'unocss/vite'
 import path from 'path'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd())
   
   return {
-    plugins: [vue()],
+    plugins: [
+      vue(),
+      UnoCSS()
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src')
@@ -94,10 +109,39 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             'vendor': ['vue', 'vue-router', 'pinia'],
-            'element-plus': ['element-plus']
+            'element-plus': ['element-plus'],
+            'unocss': ['@unocss/preset-uno', '@unocss/preset-attributify', '@unocss/preset-icons']
           }
         }
       }
+    }
+  }
+})
+```
+
+### UnoCSS 配置
+
+```typescript
+// uno.config.ts
+import { defineConfig, presetUno, presetAttributify, presetIcons } from 'unocss'
+
+export default defineConfig({
+  presets: [
+    presetUno(),
+    presetAttributify(),
+    presetIcons({
+      scale: 1.2,
+      warn: true
+    })
+  ],
+  shortcuts: {
+    'btn': 'px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600',
+    'card': 'p-4 rounded-lg shadow-md bg-white'
+  },
+  theme: {
+    colors: {
+      primary: '#3b82f6',
+      secondary: '#64748b'
     }
   }
 })

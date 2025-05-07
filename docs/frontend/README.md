@@ -19,21 +19,37 @@
 frontend/
 ├── public/               # 静态资源
 ├── src/                  # 源代码
-│   ├── assets/           # 静态资源
-│   │   └── scss/         # SCSS样式
-│   ├── components/       # Vue组件
-│   │   ├── common/       # 通用UI组件
-│   │   ├── layout/       # 布局组件
-│   │   └── features/     # 功能组件
-│   ├── composables/      # 组合式函数
-│   ├── router/           # 路由配置
-│   ├── stores/           # Pinia状态
-│   ├── services/         # API服务
-│   ├── types/            # TypeScript类型
-│   ├── utils/            # 工具函数
-│   └── views/            # 页面视图
-├── tests/                # 测试目录
-└── package.json          # 依赖配置
+│   ├── assets/          # 静态资源
+│   ├── components/      # Vue组件
+│   ├── hooks/           # 自定义Hooks
+│   ├── layouts/         # 布局组件
+│   ├── pages/           # 页面组件
+│   ├── router/          # 路由配置
+│   ├── services/        # API服务
+│   ├── stores/          # Pinia状态
+│   ├── styles/          # 全局样式
+│   ├── types/           # TypeScript类型
+│   ├── utils/           # 工具函数
+│   ├── App.vue          # 根组件
+│   └── main.ts          # 入口文件
+├── .vscode/             # VSCode配置
+├── node_modules/        # 依赖包
+├── .eslintrc.cjs        # ESLint配置
+├── .prettierrc.json     # Prettier配置
+├── .npmrc              # NPM配置
+├── auto-imports.d.ts    # 自动导入类型声明
+├── components.d.ts      # 组件类型声明
+├── docker-entrypoint.sh # Docker入口脚本
+├── Dockerfile          # Docker配置
+├── index.html          # HTML模板
+├── nginx.conf          # Nginx配置
+├── package.json        # 项目配置
+├── pnpm-lock.yaml      # 依赖锁定文件
+├── tsconfig.json       # TypeScript配置
+├── tsconfig.app.json   # 应用TypeScript配置
+├── tsconfig.node.json  # Node TypeScript配置
+├── uno.config.ts       # UnoCSS配置
+└── vite.config.ts      # Vite配置
 ```
 
 ## 组件结构
