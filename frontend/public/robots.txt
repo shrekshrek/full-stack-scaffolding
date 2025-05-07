@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /todo
+
+# 禁止爬取所有私有页面
+Disallow: /*?token=
+
+# 优化爬虫抓取频率
+Crawl-delay: 10
+
+Sitemap: https://example.com/sitemap.xml 

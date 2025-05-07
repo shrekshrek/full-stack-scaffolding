@@ -1,0 +1,69 @@
+/* 
+ * 全局通用样式
+ * 包含全局样式设置和修复
+ */
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 全局背景设置 */
+html, 
+body, 
+#app {
+  background-color: #ffffff !important; /* 强制使用白色背景 */
+  color: #303133 !important; /* 强制使用深色文本 */
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: block;
+  height: 100%;
+  overflow-x: hidden; /* 防止水平滚动条 */
+}
+
+/* 深色模式 - 临时禁用，解决全黑问题 */
+/*
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #141414;
+    color: #e5eaf3;
+  }
+}
+*/
+
+/* 元素交互状态 */
+a {
+  text-decoration: none;
+  color: var(--el-color-primary, #409eff);
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: 2px solid rgba(64, 158, 255, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+button:focus {
+  outline: 2px solid rgba(64, 158, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* 转场动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+} 

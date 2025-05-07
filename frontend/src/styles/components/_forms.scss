@@ -1,0 +1,106 @@
+/* 
+ * 表单组件样式
+ * 定义与UnoCSS结合使用的表单元素样式
+ */
+
+/* 表单组 */
+.form-group {
+  @apply mb-4;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.form-hint {
+  @apply mt-1 text-sm text-gray-500;
+}
+
+.form-error {
+  @apply mt-1 text-sm text-red-600;
+}
+
+/* 输入框 */
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded shadow-sm
+         focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+  
+  &.is-error {
+    @apply border-red-500 focus:ring-red-500 focus:border-red-500;
+  }
+  
+  &:disabled {
+    @apply bg-gray-100 cursor-not-allowed text-gray-500;
+  }
+}
+
+/* 文本域 */
+.form-textarea {
+  @apply form-input min-h-[6rem] resize-y;
+}
+
+/* 复选框 */
+.form-checkbox {
+  @apply h-4 w-4 text-primary-600 border-gray-300 rounded
+         focus:ring-primary-500 focus:ring-2;
+  
+  &.is-error {
+    @apply border-red-500;
+  }
+}
+
+/* 单选框 */
+.form-radio {
+  @apply h-4 w-4 text-primary-600 border-gray-300 
+         focus:ring-primary-500 focus:ring-2;
+  
+  &.is-error {
+    @apply border-red-500;
+  }
+}
+
+/* 选择框 */
+.form-select {
+  @apply form-input bg-no-repeat pr-10;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  background-size: 1.5em 1.5em;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* 开关 */
+.form-switch {
+  @apply relative inline-flex h-6 w-11 items-center rounded-full
+         bg-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+         
+  &:before {
+    content: '';
+    @apply absolute h-5 w-5 transform rounded-full bg-white transition 
+           translate-x-1 peer-checked:translate-x-5;
+  }
+  
+  &.is-checked:before {
+    @apply translate-x-5;
+  }
+  
+  &.is-checked {
+    @apply bg-primary-600;
+  }
+}
+
+/* 横向表单排列 */
+.form-horizontal {
+  .form-group {
+    @apply sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start;
+  }
+  
+  .form-label {
+    @apply sm:mt-1.5 sm:col-span-1;
+  }
+  
+  .form-controls {
+    @apply sm:col-span-2;
+  }
+} 

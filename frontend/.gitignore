@@ -1,0 +1,77 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build output
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Test coverage
+coverage
+.nyc_output
+
+# Env files
+.env
+.env.*
+!.env.example
+!.env.development
+!.env.staging
+!.env.production
+
+# Cache files
+.cache
+.babel-cache
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# Yarn
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Cypress
+cypress/videos
+cypress/screenshots
+
+# Storybook
+storybook-static
+
+# 编译生成的配置文件
+vite.config.js
+vite.config.d.ts
+*.config.js
+*.config.d.ts
+!postcss.config.js
+!tailwind.config.js
+
+# Auto generated files
+src/auto-imports.d.ts
+src/components.d.ts

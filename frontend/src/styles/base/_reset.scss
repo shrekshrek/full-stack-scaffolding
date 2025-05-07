@@ -1,0 +1,59 @@
+/* 
+ * 基础样式重置
+ * 与UnoCSS兼容的基础样式重置
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100%;
+  line-height: 1.6;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* 表单元素重置 */
+button, 
+input, 
+textarea, 
+select {
+  font: inherit;
+  color: inherit;
+}
+
+input, 
+textarea {
+  appearance: none;
+}
+
+/* 移除列表样式 */
+ul, 
+ol {
+  list-style: none;
+}
+
+/* 图片处理 */
+img, 
+picture, 
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 移除链接的默认样式 */
+a {
+  text-decoration: none;
+  color: inherit;
+} 

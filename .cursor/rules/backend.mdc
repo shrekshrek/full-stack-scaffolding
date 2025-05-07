@@ -1,0 +1,99 @@
+---
+description: 
+globs: *.py
+alwaysApply: false
+---
+# Cursor Rules for Backend
+# Version: 1.0.0
+
+# Project Configuration
+project: {
+  name: "backend"
+  type: "fastapi"
+  package-manager: "pip"
+  python-version: "3.11"
+}
+
+# Dependencies
+dependencies: {
+  core: ["fastapi", "uvicorn", "starlette", "gunicorn", "pydantic", "pydantic-settings"]
+  security: ["python-jose", "passlib", "python-multipart"]
+  database: ["sqlalchemy", "alembic", "psycopg2-binary"]
+  testing: ["pytest", "pytest-cov", "pytest-asyncio", "httpx"]
+  utils: ["python-dotenv", "jinja2", "slowapi", "email-validator", "loguru", "prometheus-fastapi-instrumentator", "requests", "pathlib"]
+}
+
+# Code Style
+style: {
+  max-line-length: 100
+  indent-size: 4
+  end-of-line: lf
+  charset: utf-8
+  trim-trailing-whitespace: true
+  insert-final-newline: true
+}
+
+# Python
+python: {
+  version: "3.11"
+  type-hints: true
+  docstrings: true
+  no-wildcard-imports: true
+  absolute-imports: true
+}
+
+# Database
+database: {
+  orm: "sqlalchemy"
+  migrations: "alembic"
+  type: "postgresql"
+}
+
+# Testing
+testing: {
+  framework: "pytest"
+  coverage: {
+    statements: 80
+    branches: 80
+    functions: 80
+    lines: 80
+  }
+}
+
+# File Patterns
+patterns: {
+  "*.py": {
+    style: "python"
+    naming: "snake_case"
+  }
+  "test_*.py": {
+    style: "python"
+    type: "test"
+    naming: "snake_case"
+  }
+  "app/*.py": {
+    style: "python"
+    type: "fastapi"
+    naming: "snake_case"
+  }
+  "models/*.py": {
+    style: "python"
+    type: "model"
+    naming: "PascalCase"
+  }
+  "migrations/*.py": {
+    style: "python"
+    type: "migration"
+    naming: "snake_case"
+  }
+}
+
+# Directory Structure
+directories: {
+  app: "FastAPI Application"
+  models: "SQLAlchemy Models"
+  migrations: "Database Migrations"
+  tests: "Test Files"
+  static: "Static Files"
+  deploy: "Deployment Scripts"
+}

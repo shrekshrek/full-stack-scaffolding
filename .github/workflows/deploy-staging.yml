@@ -1,0 +1,90 @@
+name: 部署到预发布环境
+
+on:
+  push:
+    branches: [ staging ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: 设置Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      
+      - name: 设置Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      
+      - name: 安装pnpm
+        run: npm install -g pnpm
+      
+      - name: 验证后端环境配置
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          python check_env.py --env-file .env.staging
+      
+      - name: 前端构建
+        run: |
+          cd frontend
+          pnpm install --frozen-lockfile
+          pnpm build:staging
+      
+      - name: 创建部署包
+        run: |
+          mkdir -p deploy
+          cp -r backend deploy/
+          cp -r frontend/dist deploy/frontend-dist
+          tar -czf staging-deploy.tar.gz deploy
+      
+      - name: 部署到服务器
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USERNAME }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          port: ${{ secrets.STAGING_SSH_PORT }}
+          source: "staging-deploy.tar.gz"
+          target: "/tmp"
+      
+      - name: 在服务器上执行部署
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USERNAME }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          port: ${{ secrets.STAGING_SSH_PORT }}
+          script: |
+            # 解压部署包
+            mkdir -p /tmp/staging-deploy
+            tar -xzf /tmp/staging-deploy.tar.gz -C /tmp/staging-deploy
+            
+            # 部署后端
+            sudo rsync -av --delete /tmp/staging-deploy/deploy/backend/ /opt/app/backend/
+            cd /opt/app/backend
+            python3 -m venv .venv
+            source .venv/bin/activate
+            pip install -r requirements.txt
+            pip install gunicorn
+            
+            # 应用数据库迁移
+            export ENV=staging
+            python -m alembic upgrade head
+            
+            # 部署前端
+            sudo rsync -av --delete /tmp/staging-deploy/deploy/frontend-dist/ /var/www/html/app/
+            
+            # 重启服务
+            sudo systemctl restart fastapi-app-staging
+            
+            # 清理临时文件
+            rm -rf /tmp/staging-deploy /tmp/staging-deploy.tar.gz 

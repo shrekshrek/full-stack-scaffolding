@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 通用代码规范
+max-line-length: 100
+indent-size: 2
+end-of-line: lf
+charset: utf-8
+trim-trailing-whitespace: true
+insert-final-newline: true
+
+# 文件命名规则
+*.md: kebab-case
+*.json: kebab-case
+*.yml: kebab-case
+*.yaml: kebab-case
+
+# 文档规范
+*.md: {
+  max-line-length: 120
+  require-headers: true
+}
+
+# 配置文件规范
+*.json: {
+  require-schema: true
+  max-line-length: 120
+}
+
+# 脚本文件规范
+*.sh: {
+  require-shebang: true
+  require-executable: true
+}

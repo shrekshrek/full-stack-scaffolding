@@ -1,0 +1,78 @@
+/* 
+ * 主样式入口文件
+ * 导入所有样式模块并根据依赖关系排序
+ */
+
+/* 1. 抽象层（变量、混合、函数） */
+@use './abstracts/variables' as vars;
+@use './abstracts/mixins' as mixins;
+
+/* 2. 基础样式（重置、排版、动画） */
+@use './base/reset';
+@use './base/typography';
+@use './base/animations';
+@use './base/globals';
+
+/* 3. 组件样式 */
+@use './components/buttons';
+@use './components/forms';
+@use './components/cards';
+@use './components/element-plus';
+
+/* 4. 主题变体 */
+@use './themes/dark';
+
+/* 5. 页面特定样式（如有必要） */
+
+/* 
+ * 前端样式协作指南:
+ * 
+ * 1. Element Plus优先级:
+ *    - 使用Element Plus提供的所有UI组件（按钮、表单、卡片等）
+ *    - 利用Element Plus的布局系统（Container/Row/Col）构建页面结构
+ *    - 充分使用Element Plus内置的状态、动画和交互效果
+ * 
+ * 2. UnoCSS辅助作用:
+ *    - 通过sm:/md:/lg:/xl:前缀处理响应式布局
+ *    - 快速设置间距、对齐等简单样式
+ *    - 在CSS中可以用@apply引用UnoCSS原子类
+ * 
+ * 3. SCSS模块补充:
+ *    - 定义可复用的组件样式和主题
+ *    - 处理复杂的样式逻辑和响应式规则
+ *    - 实现Element Plus组件的自定义样式
+ */
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #909399;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #606266;
+}
+
+/* 在深色模式下调整滚动条 */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+} 

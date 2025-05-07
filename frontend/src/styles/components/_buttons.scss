@@ -1,0 +1,80 @@
+/* 
+ * 按钮组件样式
+ * 定义与UnoCSS结合使用的按钮变体
+ */
+
+.btn {
+  @apply px-4 py-2 rounded font-medium transition-colors inline-block;
+  
+  &:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+}
+
+/* 主要按钮 */
+.btn-primary {
+  @apply bg-primary text-white hover:bg-primary-700;
+  
+  &:focus {
+    @apply outline-none ring-2 ring-primary-300 ring-offset-2;
+  }
+}
+
+/* 次要按钮 */
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+  
+  &:focus {
+    @apply outline-none ring-2 ring-gray-300 ring-offset-2;
+  }
+}
+
+/* 危险按钮 */
+.btn-danger {
+  @apply bg-red-500 text-white hover:bg-red-600;
+  
+  &:focus {
+    @apply outline-none ring-2 ring-red-300 ring-offset-2;
+  }
+}
+
+/* 成功按钮 */
+.btn-success {
+  @apply bg-green-500 text-white hover:bg-green-600;
+  
+  &:focus {
+    @apply outline-none ring-2 ring-green-300 ring-offset-2;
+  }
+}
+
+/* 文本按钮 */
+.btn-text {
+  @apply bg-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-3 py-1;
+  
+  &:focus {
+    @apply outline-none ring-2 ring-gray-300 ring-offset-1;
+  }
+}
+
+/* 大小变体 */
+.btn-sm {
+  @apply px-3 py-1 text-sm;
+}
+
+.btn-lg {
+  @apply px-6 py-3 text-lg;
+}
+
+/* 形状变体 */
+.btn-rounded {
+  @apply rounded-full;
+}
+
+.btn-icon {
+  @apply p-2 rounded-full;
+}
+
+/* 带图标的按钮 */
+.btn-with-icon {
+  @apply inline-flex items-center gap-2;
+} 

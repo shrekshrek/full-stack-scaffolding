@@ -1,0 +1,95 @@
+---
+description: 
+globs: *.vue,*.ts
+alwaysApply: false
+---
+# Cursor Rules for Frontend
+# Version: 1.0.0
+
+# Project Configuration
+project: {
+  name: "frontend"
+  type: "vue"
+  version: "3.x"
+  package-manager: "pnpm"
+  package-manager-version: "8.x"
+  build-tool: "vite"
+}
+
+# Dependencies
+dependencies: {
+  core: ["vue", "vue-router", "pinia"]
+  ui: ["@unocss/vite", "@vueuse/core"]
+  dev: ["typescript", "vite", "eslint", "prettier"]
+}
+
+# Code Style
+style: {
+  max-line-length: 100
+  indent-size: 2
+  end-of-line: lf
+  charset: utf-8
+  trim-trailing-whitespace: true
+  insert-final-newline: true
+  formatter: "prettier"
+  linter: "eslint"
+}
+
+# TypeScript
+typescript: {
+  version: "5.x"
+  strict: true
+  no-explicit-any: true
+  require-types: true
+}
+
+# Vue
+vue: {
+  version: "3.x"
+  composition-api: true
+  script-setup: true
+  typescript: true
+}
+
+# File Patterns
+patterns: {
+  "*.vue": {
+    style: "vue"
+    naming: "PascalCase"
+    type: "component"
+  }
+  "*.ts": {
+    style: "typescript"
+    naming: "camelCase"
+  }
+  "*.test.ts": {
+    style: "typescript"
+    type: "test"
+  }
+  "components/*": {
+    naming: "PascalCase"
+    type: "component"
+  }
+  "composables/*": {
+    naming: "camelCase"
+    prefix: "use"
+  }
+  "utils/*": {
+    naming: "camelCase"
+  }
+  "types/*": {
+    naming: "PascalCase"
+    prefix: "I"
+  }
+}
+
+# Directory Structure
+directories: {
+  src: "Source Code"
+  components: "Vue Components"
+  composables: "Vue Composables"
+  utils: "Utility Functions"
+  types: "TypeScript Types"
+  public: "Static Assets"
+  tests: "Test Files"
+}

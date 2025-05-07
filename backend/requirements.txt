@@ -1,0 +1,43 @@
+# 核心依赖
+fastapi==0.115.12
+uvicorn==0.34.2
+starlette==0.46.2
+gunicorn==23.0.0
+pydantic==2.11.4
+pydantic-settings==2.9.1
+
+# 安全相关
+python-jose==3.4.0
+passlib==1.7.4
+python-multipart==0.0.20
+
+# 数据库相关
+sqlalchemy==2.0.40
+alembic==1.15.2
+psycopg2-binary==2.9.10  # PostgreSQL驱动
+
+# 配置
+python-dotenv==1.1.0
+
+# API文档
+jinja2==3.1.6
+
+# 速率限制
+slowapi==0.1.9
+
+# 杂项
+email-validator==2.2.0
+httpx==0.28.1
+
+# 日志和监控
+loguru==0.7.3
+prometheus-fastapi-instrumentator==7.1.0
+
+# 测试依赖
+pytest==8.3.5
+pytest-cov==6.1.1
+pytest-asyncio==0.26.0
+
+# 工具脚本依赖
+requests==2.31.0  # 用于下载静态文件
+pathlib==1.0.1   # 用于文件路径处理 
