@@ -33,7 +33,7 @@ frontend/
 ├── src/
 │   ├── assets/          # 静态资源
 │   ├── components/      # Vue组件
-│   ├── hooks/           # 自定义Hooks
+│   ├── composables/     # 可复用的组合式函数
 │   ├── layouts/         # 布局组件
 │   ├── pages/           # 页面组件
 │   ├── router/          # 路由配置

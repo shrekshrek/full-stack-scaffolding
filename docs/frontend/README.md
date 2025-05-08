@@ -26,6 +26,7 @@ frontend/
 │   ├── pages/            # 业务功能页面
 │   ├── stores/           # 状态管理
 │   ├── services/         # API服务
+│   ├── composables/      # 可复用的组合式函数
 │   └── ...其他模块
 ├── public/               # 静态资源
 └── ...配置文件
@@ -43,6 +44,13 @@ frontend/
 - **TodoStore** - 管理待办事项数据
 - **UserStore** - 用户信息管理
 - **AppStore** - 应用全局状态
+
+### 组合式函数（Composables）
+
+项目使用Vue 3的组合式API将可复用的逻辑抽取到composables中：
+
+- **useAuth** - 身份验证相关功能
+- **useTodos** - 待办事项管理功能
 
 ### API通信
 
@@ -70,7 +78,7 @@ frontend/
 1. 遵循Vue 3组合式API最佳实践
 2. 使用统一的项目结构组织代码
 3. 使用TypeScript类型提高代码质量
-4. 将通用逻辑抽取到hooks和utils中
+4. 将通用逻辑抽取到composables和utils中
 5. 使用Pinia进行状态管理
 6. 分离UI和业务逻辑
 

@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useTodos } from '@/hooks/useTodos'
+import { useTodos } from '@/composables/useTodos'
 import TodoItem from '@/components/features/TodoItem.vue'
 import type { Todo, TodoCreateData } from '@/types/todo'
 

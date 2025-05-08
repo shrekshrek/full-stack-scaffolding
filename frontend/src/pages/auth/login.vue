@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/composables/useAuth'
 import type { FormInstance, FormRules } from 'element-plus'
 
 // 图标
