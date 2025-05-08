@@ -120,11 +120,12 @@ export class UserService {
 
 ### 1. 项目组织结构
 
-项目按照功能和用途划分为不同目录：
+项目按照复用性和用途划分组件：
 
-- **components/**：可复用UI组件
-  - 通用组件（Button、Input等）
-  - 业务组件（UserCard、OrderList等）
+- **components/**：全局共用组件
+  - 扁平结构组织，不再细分子目录
+  - 可在多个页面中复用的UI组件和业务组件
+  - 不包含特定页面的业务逻辑
   
 - **layouts/**：布局组件
   - DefaultLayout：默认布局
@@ -135,6 +136,9 @@ export class UserService {
   - 对应路由的页面组件
   - 组合多个组件形成完整页面
   - 处理页面级别的业务逻辑
+  - **pages/[page-name]/components/**：页面专属组件
+    - 只在特定页面中使用的组件
+    - 包含页面特定的业务逻辑
 
 ### 2. 组件通信
 

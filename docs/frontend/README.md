@@ -21,9 +21,12 @@
 ```
 frontend/
 ├── src/                  # 源代码目录
-│   ├── components/       # 可复用UI组件
+│   ├── components/       # 全局共用组件（扁平结构）
 │   ├── layouts/          # 页面布局组件
 │   ├── pages/            # 业务功能页面
+│   │   └── [page-name]/  # 具体页面
+│   │       ├── index.vue # 页面组件
+│   │       └── components/# 页面专属组件
 │   ├── stores/           # 状态管理
 │   ├── services/         # API服务
 │   ├── composables/      # 可复用的组合式函数
