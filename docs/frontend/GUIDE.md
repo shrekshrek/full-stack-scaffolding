@@ -45,7 +45,6 @@ frontend/
 │   ├── App.vue          # 根组件
 │   └── main.ts          # 入口文件
 ├── public/              # 公共资源
-├── .vscode/             # VSCode配置
 ├── .eslintrc.cjs        # ESLint配置
 ├── .prettierrc.json     # Prettier配置
 ├── uno.config.ts        # UnoCSS配置
