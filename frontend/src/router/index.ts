@@ -49,7 +49,7 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, _from, next) => {
   // 设置页面标题
-  document.title = `${to.meta.title || '首页'} | FastAPI+Vue全栈应用`
+  document.title = `${to.meta.title || '首页'} | ${import.meta.env.VITE_APP_TITLE || 'FastAPI+Vue全栈应用'}`
 
   // 检查认证要求
   if (to.meta.requiresAuth) {
