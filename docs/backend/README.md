@@ -13,22 +13,60 @@
 - 异步请求处理
 - 自动生成API文档
 
-## 目录结构
+## 项目结构
+
+后端项目采用模块化的结构组织：
 
 ```
 backend/
 ├── app/                  # 应用主目录
-│   ├── api/              # API路由
-│   ├── core/             # 核心配置
-│   ├── middlewares/      # 中间件
-│   ├── models/           # 数据库模型
-│   ├── repositories/     # 数据访问仓储
-│   ├── schemas/          # 数据验证模式
-│   └── services/         # 业务逻辑服务
-├── migrations/           # 数据库迁移脚本
+│   ├── api/             # API路由
+│   ├── core/            # 核心配置
+│   ├── models/          # 数据模型
+│   ├── schemas/         # 数据验证模式
+│   ├── services/        # 业务逻辑
+│   ├── repositories/    # 数据访问层
+│   └── middlewares/     # 中间件
 ├── tests/                # 测试目录
-└── requirements.txt      # 依赖列表
+├── migrations/           # 数据库迁移脚本
+└── ...配置文件
 ```
+
+> 详细的项目结构和说明请参考[后端开发指南](GUIDE.md#项目结构)
+
+## 核心功能模块
+
+### 数据访问层
+
+采用仓储模式隔离数据访问逻辑：
+
+```python
+# 仓储类
+class TodoRepository:
+    def __init__(self, db_session: AsyncSession):
+        self.db_session = db_session
+
+    async def get_by_id(self, todo_id: int) -> Optional[Todo]:
+        result = await self.db_session.execute(
+            select(Todo).filter(Todo.id == todo_id)
+        )
+        return result.scalars().first()
+```
+
+### 业务服务层
+
+处理核心业务逻辑，调用仓储层：
+
+```python
+# 服务层
+async def get_todo(db: AsyncSession, todo_id: int) -> Optional[Todo]:
+    repo = TodoRepository(db)
+    return await repo.get_by_id(todo_id)
+```
+
+### 认证授权
+
+使用JWT实现用户认证和权限控制。
 
 ## 关键优化
 
@@ -49,41 +87,15 @@ backend/
 - 仓储模式标准化实现
 - 自动化数据库迁移
 
-### 环境配置
-- 多环境配置管理（开发、测试、生产）
-- 敏感信息保护
-- 环境变量验证
+## 环境配置
 
-### API文档
-- 增强OpenAPI规范
-- 自动生成API文档界面 (/api/docs)
-- API版本控制
+后端支持多环境部署：
 
-## 仓储模式实现
+- **开发环境** (`.env.development`)
+- **预发布环境** (`.env.staging`) 
+- **生产环境** (`.env.production`)
 
-我们使用仓储模式分离数据访问逻辑，示例代码：
-
-```python
-# 仓储类
-class TodoRepository:
-    def __init__(self, db_session: AsyncSession):
-        self.db_session = db_session
-
-    async def get_by_id(self, todo_id: int) -> Optional[Todo]:
-        result = await self.db_session.execute(
-            select(Todo).filter(Todo.id == todo_id)
-        )
-        return result.scalars().first()
-        
-    # ... 其他数据访问方法
-```
-
-```python
-# 服务层
-async def get_todo(db: AsyncSession, todo_id: int) -> Optional[Todo]:
-    repo = TodoRepository(db)
-    return await repo.get_by_id(todo_id)
-```
+> 详细配置说明请参考[后端环境配置](ENVIRONMENT.md)
 
 ## 开发注意事项
 
@@ -93,10 +105,7 @@ async def get_todo(db: AsyncSession, todo_id: int) -> Optional[Todo]:
 4. 使用Alembic管理数据库迁移
 5. 将业务逻辑放在service层，保持控制器简洁
 
-## 后续建议
+## 相关文档
 
-1. 添加单元测试和集成测试
-2. 实现缓存机制（Redis）
-3. 配置CI/CD流程
-4. 添加应用性能监控
-5. 实现更完善的文档生成系统 
+- [后端开发指南](GUIDE.md) - 详细的开发规范和最佳实践
+- [后端环境配置](ENVIRONMENT.md) - 环境变量和配置说明 

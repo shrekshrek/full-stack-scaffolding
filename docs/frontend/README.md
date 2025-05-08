@@ -10,71 +10,32 @@
 - TypeScript类型支持
 - Pinia状态管理
 - Vue Router路由管理
+- UnoCSS原子化CSS
 - 响应式设计
 - Vite构建工具
 
-## 目录结构
+## 项目结构
+
+前端项目采用模块化的结构组织：
 
 ```
 frontend/
+├── src/                  # 源代码目录
+│   ├── components/       # 可复用UI组件
+│   ├── layouts/          # 页面布局组件
+│   ├── pages/            # 业务功能页面
+│   ├── stores/           # 状态管理
+│   ├── services/         # API服务
+│   └── ...其他模块
 ├── public/               # 静态资源
-├── src/                  # 源代码
-│   ├── assets/          # 静态资源
-│   ├── components/      # Vue组件
-│   ├── hooks/           # 自定义Hooks
-│   ├── layouts/         # 布局组件
-│   ├── pages/           # 页面组件
-│   ├── router/          # 路由配置
-│   ├── services/        # API服务
-│   ├── stores/          # Pinia状态
-│   ├── styles/          # 全局样式
-│   ├── types/           # TypeScript类型
-│   ├── utils/           # 工具函数
-│   ├── App.vue          # 根组件
-│   └── main.ts          # 入口文件
-├── .vscode/             # VSCode配置
-├── node_modules/        # 依赖包
-├── .eslintrc.cjs        # ESLint配置
-├── .prettierrc.json     # Prettier配置
-├── .npmrc              # NPM配置
-├── auto-imports.d.ts    # 自动导入类型声明
-├── components.d.ts      # 组件类型声明
-├── docker-entrypoint.sh # Docker入口脚本
-├── Dockerfile          # Docker配置
-├── index.html          # HTML模板
-├── nginx.conf          # Nginx配置
-├── package.json        # 项目配置
-├── pnpm-lock.yaml      # 依赖锁定文件
-├── tsconfig.json       # TypeScript配置
-├── tsconfig.app.json   # 应用TypeScript配置
-├── tsconfig.node.json  # Node TypeScript配置
-├── uno.config.ts       # UnoCSS配置
-└── vite.config.ts      # Vite配置
+└── ...配置文件
 ```
 
-## 组件结构
+> 详细的项目结构和说明请参考[前端开发指南](GUIDE.md#项目结构)
 
-前端组件已按功能和用途分为三层：
+## 核心功能模块
 
-1. **通用组件** (`components/common/`)
-   - 独立、可复用的UI组件
-   - 如 `HelloWorld.vue` - 示例欢迎组件
-   - 不包含业务逻辑
-   - 适合在多个场景重复使用
-
-2. **布局组件** (`components/layout/`)
-   - 处理页面布局和结构
-   - 如 `AppLayout.vue` - 全局应用布局组件
-   - 提供整体页面框架
-   - 通常包含导航、侧边栏、页脚等
-
-3. **功能组件** (`components/features/`)
-   - 特定功能的业务组件
-   - 如 `TodoItem.vue` - 待办事项组件
-   - 实现特定的业务场景
-   - 通常包含具体业务逻辑
-
-## 状态管理
+### 状态管理
 
 使用Pinia进行状态管理，主要store包括：
 
@@ -83,34 +44,16 @@ frontend/
 - **UserStore** - 用户信息管理
 - **AppStore** - 应用全局状态
 
-## API通信
+### API通信
 
 与后端通信的关键模块：
 
-- **API客户端**
-  - 使用axios进行HTTP请求
-  - 基础URL配置为环境变量`VITE_API_BASE_URL`
-  - 统一的请求/响应拦截器
-  - 支持请求重试、错误处理、请求去重
-  - 自动处理认证令牌
+- **API客户端** - 使用axios进行HTTP请求
+- **服务模块** - 封装业务逻辑的API调用
 
-- **服务模块**
-  - userService - 用户认证和管理
-  - todoService - 待办事项管理
+### 工具函数库
 
-## 工具函数库
-
-前端提供了一系列实用工具函数：
-
-1. **日期处理** (`utils/dateFormat.ts`)
-   - 提供日期格式化功能
-   - 支持相对时间显示（如"3分钟前"）
-   - 提供多种日期展示格式
-
-2. **本地存储** (`utils/storage.ts`)
-   - localStorage操作的类型安全封装
-   - 支持复杂对象的自动序列化和反序列化
-   - 提供命名空间防止键名冲突
+前端提供了一系列实用工具函数，包括日期处理、本地存储等。
 
 ## 环境配置
 
@@ -120,12 +63,18 @@ frontend/
 - **预发布环境** (`.env.staging`) 
 - **生产环境** (`.env.production`)
 
-每个环境可配置不同的API基础URL、应用标题等参数。
+> 详细配置说明请参考[前端环境配置](ENVIRONMENT.md)
 
 ## 开发注意事项
 
 1. 遵循Vue 3组合式API最佳实践
-2. 组件按照通用/布局/功能三层架构组织
+2. 使用统一的项目结构组织代码
 3. 使用TypeScript类型提高代码质量
-4. 将通用逻辑抽取到工具函数和组合式函数
-5. 分离UI和业务逻辑 
+4. 将通用逻辑抽取到hooks和utils中
+5. 使用Pinia进行状态管理
+6. 分离UI和业务逻辑
+
+## 相关文档
+
+- [前端开发指南](GUIDE.md) - 详细的开发规范和最佳实践
+- [前端环境配置](ENVIRONMENT.md) - 环境变量和构建配置 

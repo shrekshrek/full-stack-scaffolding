@@ -30,25 +30,29 @@
 
 ```
 backend/
-├── app/
-│   ├── api/           # API 路由
-│   ├── core/          # 核心配置
-│   ├── db/            # 数据库
-│   ├── models/        # 数据模型
-│   ├── schemas/       # Pydantic 模型
-│   ├── services/      # 业务逻辑
-│   └── utils/         # 工具函数
-├── data/             # 数据文件目录
-│   ├── .gitkeep     # 保持目录存在
-│   └── *.db         # SQLite数据库文件
-├── scripts/           # 工具脚本
-│   ├── setup_env_files.py    # 环境配置生成
-│   ├── check_env.py          # 环境检查
-│   ├── download_static_files.py  # 静态文件下载
-│   └── gen_secrets.py        # 密钥生成
-├── tests/             # 测试文件
-├── alembic/           # 数据库迁移
-└── main.py           # 应用入口
+├── app/                 # 应用主目录
+│   ├── api/            # API路由
+│   ├── core/           # 核心配置
+│   ├── models/         # 数据模型
+│   ├── schemas/        # Pydantic模型
+│   ├── services/       # 业务逻辑
+│   ├── repositories/   # 数据访问层
+│   ├── middlewares/    # 中间件
+│   └── utils/          # 工具函数
+├── tests/              # 测试目录
+│   ├── unit/          # 单元测试
+│   └── integration/   # 集成测试
+├── migrations/         # 数据库迁移
+│   └── versions/      # 迁移版本
+├── scripts/            # 工具脚本
+├── data/               # 数据文件目录
+├── static/             # 静态文件
+├── deploy/             # 部署配置
+├── alembic.ini         # Alembic配置
+├── pytest.ini          # Pytest配置
+├── requirements.txt    # 依赖列表
+├── Dockerfile          # Docker配置
+└── main.py             # 应用入口
 ```
 
 ## 开发规范

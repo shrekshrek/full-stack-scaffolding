@@ -118,12 +118,23 @@ export class UserService {
 
 ## 组件开发
 
-### 1. 组件分类
+### 1. 项目组织结构
 
-- 基础组件：Button、Input 等
-- 业务组件：UserCard、OrderList 等
-- 布局组件：Header、Sidebar 等
-- 页面组件：Home、Profile 等
+项目按照功能和用途划分为不同目录：
+
+- **components/**：可复用UI组件
+  - 通用组件（Button、Input等）
+  - 业务组件（UserCard、OrderList等）
+  
+- **layouts/**：布局组件
+  - DefaultLayout：默认布局
+  - AdminLayout：管理后台布局
+  - AuthLayout：认证页面布局
+  
+- **pages/**：业务页面
+  - 对应路由的页面组件
+  - 组合多个组件形成完整页面
+  - 处理页面级别的业务逻辑
 
 ### 2. 组件通信
 

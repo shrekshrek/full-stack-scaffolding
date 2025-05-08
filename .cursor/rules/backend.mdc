@@ -42,6 +42,30 @@ python: {
   absolute-imports: true
 }
 
+# 虚拟环境
+virtualenv: {
+  name: ".venv"
+  activation: {
+    unix: "source .venv/bin/activate"
+    windows: ".venv\\Scripts\\activate"
+  }
+  requirements: "requirements.txt"
+  dev-requirements: "requirements-dev.txt"
+  install-command: "pip install -r"
+  package-install: "pip install"
+  # 确保在虚拟环境中运行任何Python命令
+  require-activation: true
+}
+
+# 命令
+commands: {
+  start: "uvicorn app.main:app --reload"
+  migrate: "alembic upgrade head"
+  test: "pytest"
+  format: "black ."
+  lint: "flake8 ."
+}
+
 # Database
 database: {
   orm: "sqlalchemy"

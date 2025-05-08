@@ -4,6 +4,22 @@
 
 这是一个基于 FastAPI 和 Vue 3 的全栈应用脚手架，采用现代化的技术栈和最佳实践，提供完整的开发、测试和部署流程。
 
+## 项目结构
+
+全栈项目采用前后端分离架构，主要由以下部分组成：
+
+```
+/
+├── frontend/          # 前端项目(Vue 3 + Vite)
+├── backend/           # 后端项目(FastAPI)
+├── docs/              # 项目文档
+└── scripts/           # 项目脚本
+```
+
+> 各部分的详细结构请参考各自的文档：
+> - [前端目录结构](frontend/GUIDE.md#项目结构)
+> - [后端目录结构](backend/GUIDE.md#项目结构)
+
 ## 文档结构
 
 ```
@@ -24,12 +40,12 @@ docs/
 ## 快速导航
 
 ### 前端文档
-- [前端概述](frontend/README.md) - 前端架构和目录结构
+- [前端概述](frontend/README.md) - 前端架构和核心设计
 - [前端开发指南](frontend/GUIDE.md) - 前端开发规范、组件设计和最佳实践
 - [前端环境配置](frontend/ENVIRONMENT.md) - 前端环境变量和配置说明
 
 ### 后端文档
-- [后端概述](backend/README.md) - 后端架构和目录结构
+- [后端概述](backend/README.md) - 后端架构和核心设计
 - [后端开发指南](backend/GUIDE.md) - 后端开发规范、API设计和最佳实践
 - [后端环境配置](backend/ENVIRONMENT.md) - 后端环境变量和配置说明
 

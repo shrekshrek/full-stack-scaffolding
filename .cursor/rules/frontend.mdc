@@ -51,6 +51,29 @@ vue: {
   typescript: true
 }
 
+# 包管理器
+package-manager: {
+  name: "pnpm"
+  version: "8.x"
+  commands: {
+    install: "pnpm install"
+    add: "pnpm add"
+    add-dev: "pnpm add -D"
+    run: "pnpm run"
+    update: "pnpm update"
+  }
+  forbidden-commands: ["npm install", "npm i", "npm run", "npm add", "yarn", "yarn add", "yarn install"]
+}
+
+# 脚本命令
+scripts: {
+  dev: "pnpm run dev"
+  build: "pnpm run build"
+  lint: "pnpm run lint"
+  format: "pnpm run format"
+  test: "pnpm run test"
+}
+
 # File Patterns
 patterns: {
   "*.vue": {
