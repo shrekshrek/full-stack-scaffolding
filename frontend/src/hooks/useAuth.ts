@@ -13,14 +13,14 @@ export function useAuth() {
 
   /**
    * 用户登录
-   * @param username 用户名
+   * @param username 用户名或邮箱
    * @param password 密码
    * @param redirectPath 登录成功后的重定向路径
    */
   const login = async (username: string, password: string, redirectPath?: string) => {
     try {
       await authStore.login({
-        email: username, // 这里使用username作为email参数
+        username,
         password
       })
 

@@ -10,6 +10,10 @@ def get_by_email(db: Session, email: str) -> Optional[User]:
     """通过邮箱获取用户"""
     return db.query(User).filter(User.email == email).first()
 
+def get_by_username(db: Session, username: str) -> Optional[User]:
+    """通过用户名获取用户"""
+    return db.query(User).filter(User.username == username).first()
+
 def get_by_id(db: Session, user_id: int) -> Optional[User]:
     """通过ID获取用户"""
     return db.query(User).filter(User.id == user_id).first()
@@ -36,9 +40,15 @@ def create(db: Session, user_data: UserCreate) -> User:
     db.refresh(db_user)
     return db_user
 
-def authenticate(db: Session, email: str, password: str) -> Optional[User]:
-    """验证用户身份"""
-    user = get_by_email(db, email=email)
+def authenticate(db: Session, username_or_email: str, password: str) -> Optional[User]:
+    """验证用户身份，支持使用用户名或邮箱登录"""
+    # 先尝试通过用户名查找
+    user = get_by_username(db, username=username_or_email)
+    
+    # 如果没找到，再尝试通过邮箱查找
+    if not user:
+        user = get_by_email(db, email=username_or_email)
+    
     if not user:
         return None
     if not verify_password(password, user.hashed_password):

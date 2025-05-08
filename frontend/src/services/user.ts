@@ -8,7 +8,7 @@ export const userService = {
    */
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const formData = new URLSearchParams()
-    formData.append('username', credentials.email)
+    formData.append('username', credentials.username)
     formData.append('password', credentials.password)
 
     return post<LoginResponse>('/auth/login', formData.toString(), {

@@ -26,12 +26,12 @@ def login_access_token(
 ) -> Any:
     """OAuth2表单登录获取访问令牌"""
     user = user_service.authenticate(
-        db, email=form_data.username, password=form_data.password
+        db, username_or_email=form_data.username, password=form_data.password
     )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="邮箱或密码不正确",
+            detail="用户名或密码不正确",
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not user.is_active:

@@ -22,8 +22,8 @@ export interface User {
  * 登录凭证接口
  */
 export interface LoginCredentials {
-  /** 用户邮箱 */
-  email: string
+  /** 用户名或邮箱 */
+  username: string
   /** 用户密码 */
   password: string
 }
