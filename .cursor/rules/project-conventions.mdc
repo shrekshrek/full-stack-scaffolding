@@ -1,0 +1,175 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 项目开发规范
+
+**本文档是项目的顶层开发规范，定义了适用于整个项目的通用约定。更具体的规范请参考以下文档：**
+- **[前端开发规范](mdc:.cursor/rules/frontend-conventions.mdc)**
+- **[后端开发规范](mdc:.cursor/rules/backend-conventions.mdc)**
+- **[开发与部署指南](mdc:DEPLOYMENT_GUIDE.md)**
+
+## 通用代码规范
+- 最大行长: 100 (特定语言/工具如 Black, Prettier 可能有自己的推荐值，具体见子项目规范)
+- 缩进大小: 2
+- 换行符: lf
+- 字符集: utf-8
+- 去除行尾空格: true
+- 文件末尾插入新行: true
+
+## 文件命名规则
+- `*.md`: kebab-case
+- `*.json`: kebab-case
+- `*.yml`: kebab-case
+- `*.yaml`: kebab-case
+- (其他特定文件类型的命名规则见各子项目规范)
+
+## 文档规范
+- `*.md`:
+  - 最大行长: 120
+  - 需要标题: true
+
+## 配置文件规范
+- `*.json`:
+  - 需要 Schema: true (如 `settings.json` for VSCode)
+  - 最大行长: 120
+
+## 脚本文件规范
+- `*.sh`:
+  - 需要 Shebang: `#!/bin/bash` (或 `#!/usr/bin/env bash`)
+  - 需要可执行权限: true
+- Python 脚本 (`*.py`) 用于项目级脚本 (如 `scripts/` 目录下) 或后端服务中 (`backend/scripts/`):
+  - 需要 Shebang: `#!/usr/bin/env python3`
+  - 需要可执行权限: true
+
+## 包管理器规范
+项目根据子模块（前端/后端）的具体需求选择合适的包管理器。
+- **前端 (`[frontend/](mdc:frontend)`)**: 使用 **pnpm**. 详细请参考 `[前端开发规范](mdc:.cursor/rules/frontend-conventions.mdc)`。
+- **后端 (`[backend/](mdc:backend)`)**: 使用 **PDM**. 详细请参考 `[后端开发规范](mdc:.cursor/rules/backend-conventions.mdc)`。
+
+## 环境变量规范
+- 开发环境文件: `[.env.development](mdc:.env.development)` (或 `backend/.env` for backend local dev)
+- 预发布环境文件: `[.env.staging](mdc:.env.staging)`
+- 生产环境文件: `[.env.production](mdc:.env.production)`
+- Docker 环境文件: `[.env.docker](mdc:.env.docker)` (或各服务特定的 docker env 文件, e.g., `backend/.env.docker`)
+- 模板文件: `[.env.example](mdc:.env.example)` (应存在于各需要 `.env` 的目录)
+- 确保使用相对路径引用环境变量文件: true (在代码/配置中引用时)
+- 具体环境变量的结构和使用，请参考 `[前端开发规范](mdc:.cursor/rules/frontend-conventions.mdc)`、`[后端开发规范](mdc:.cursor/rules/backend-conventions.mdc)` 和 `[开发与部署指南](mdc:DEPLOYMENT_GUIDE.md)`。
+
+## Docker规范
+- 优先使用 docker-compose 而非单独的 docker 命令: true
+- docker-compose 文件版本: \"3.8\" (或更新的稳定版本，在 `[docker-compose.yml](mdc:docker-compose.yml)` 中指定)
+- 禁止使用 root 用户运行容器: true
+- 详细的 Dockerfile 和 Docker Compose 配置见 `[开发与部署指南](mdc:DEPLOYMENT_GUIDE.md)` 以及前后端各自的规范文档。
+
+## CI/CD规范
+- 推荐使用的 CI/CD 平台: \"github-actions\"
+- 构建脚本命名规则: `build-*.sh` (例如，在 `[scripts/](mdc:scripts)` 或各子项目 `scripts/` 目录下)
+- 部署脚本命名规则: `deploy-*.sh` (例如，在 `[scripts/](mdc:scripts)` 或各子项目 `scripts/` 目录下)
+- 详细的 CI/CD 流程和配置示例见 `[开发与部署指南](mdc:DEPLOYMENT_GUIDE.md)`。
+
+## 文件编码规范
+- 所有文件统一使用 UTF-8 编码: true
+- 禁止使用 BOM: true
+
+## 项目结构规范
+- 后端目录: `[backend/](mdc:backend)` (详细内部结构见 `[后端开发规范](mdc:.cursor/rules/backend-conventions.mdc)`)
+- 前端目录: `[frontend/](mdc:frontend)` (详细内部结构见 `[前端开发规范](mdc:.cursor/rules/frontend-conventions.mdc)`)
+- 通用文档目录: `[docs/](mdc:docs)` (本项目生成的规范文档在 `[.cursor/rules/](mdc:.cursor/rules)`)
+- 通用脚本目录: `[scripts/](mdc:scripts)` (各子项目也可能有自己的 `scripts/` 目录)
+- 通用配置文件目录: `[config/](mdc:config)` (如果存在项目级共享配置)
+- CI/CD 工作流目录: `[.github/workflows/](mdc:.github/workflows)`
+
+## 脚本执行权限规范
+- 需要执行权限的文件模式: `*.sh`, `scripts/*.py`, `backend/scripts/*.py`
+- 添加执行权限的命令: `chmod +x`
+- 检查执行权限的命令: `ls -la`
+- 规则检查:
+  - Shell 脚本 (`*.sh`, 排除 `node_modules`):
+    - 必须有执行权限: true
+    - 必须有 Shebang: true
+    - Shebang: `#!/bin/bash` (或 `#!/usr/bin/env bash`)
+  - Python 脚本 (`scripts/*.py`, `backend/scripts/*.py`):
+    - 必须有执行权限: true
+    - 必须有 Shebang: true
+    - Shebang: `#!/usr/bin/env python3`
+
+## 开发辅助工具
+
+### 脚本执行权限检查工具
+描述: 检查并修复脚本文件权限问题的自动化工具
+命令:
+  - 描述: 检查所有相关 shell 脚本权限
+    命令: `find . -name \"*.sh\" -type f -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" | xargs ls -la`
+    输出: text
+  - 描述: 检查所有相关 Python 脚本权限
+    命令: `find . -name \"*.py\" -type f \\( -path \"*/scripts/*\" -o -path \"*/backend/scripts/*\" \\) -not -path \"*/.venv/*\" -not -path \"*/.pdm-cache/*\" | xargs ls -la`
+    输出: text
+  - 描述: 修复所有相关 shell 脚本权限
+    命令: `find . -name \"*.sh\" -type f -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" | xargs chmod +x`
+    输出: silent
+  - 描述: 修复所有相关 Python 脚本权限
+    命令: `find . -name \"*.py\" -type f \\( -path \"*/scripts/*\" -o -path \"*/backend/scripts/*\" \\) -not -path \"*/.venv/*\" -not -path \"*/.pdm-cache/*\" | xargs chmod +x`
+    输出: silent
+  - 描述: 检查所有相关 shell 脚本 shebang
+    命令: `grep -L -E \"^#!/(usr/)?bin/(env )?bash\" $(find . -name \"*.sh\" -type f -not -path \"*/node_modules/*\" -not -path \"*/.git/*\")`
+    输出: list
+    错误处理: ignore
+  - 描述: 检查所有相关 Python 脚本 shebang
+    命令: `grep -L \"^#!/usr/bin/env python3\" $(find . -name \"*.py\" -type f \\( -path \"*/scripts/*\" -o -path \"*/backend/scripts/*\" \\) -not -path \"*/.venv/*\" -not -path \"*/.pdm-cache/*\")`
+    输出: list
+    错误处理: ignore
+
+### 推荐的 Git Hooks
+如果项目使用 `pre-commit` 框架 (推荐，配置文件如 `[.pre-commit-config.yaml](mdc:.pre-commit-config.yaml)`), 则具体的钩子逻辑应在该配置文件中定义，以利用其更强大的功能和社区钩子。\n
+以下是一个简化的 `bash` 脚本示例，可用于 `[.git/hooks/pre-commit](mdc:.git/hooks/pre-commit)`，但**推荐使用 `pre-commit` 框架**。
+
+\\`\\`\\`bash
+#!/bin/bash
+set -e # Exit immediately if a command exits with a non-zero status.
+
+echo "Running pre-commit checks..."
+
+# 1. Fix and check Shell script permissions and shebangs
+SHELL_SCRIPTS=$(find . -name \"*.sh\" -type f -not -path \"*/node_modules/*\" -not -path \"*/.git/*\")
+if [ -n \"$SHELL_SCRIPTS\" ]; then
+    echo \"Checking Shell scripts...\"
+    echo \"$SHELL_SCRIPTS\" | xargs chmod +x
+    MISSING_SHEBANG_SH=$(echo \"$SHELL_SCRIPTS\" | xargs grep -L -E \"^#!/(usr/)?bin/(env )?bash\" || true)
+    if [ ! -z \"$MISSING_SHEBANG_SH\" ]; then
+        echo \"ERROR: The following Shell scripts are missing a valid shebang (# shellcheck disable=SC2028):\"
+        echo \"$MISSING_SHEBANG_SH\"
+        exit 1
+    fi
+fi
+
+# 2. Fix and check Python script permissions and shebangs (in specified directories)
+PYTHON_SCRIPTS=$(find . -name \"*.py\" -type f \\( -path \"*/scripts/*\" -o -path \"*/backend/scripts/*\" \\) -not -path \"*/.venv/*\" -not -path \"*/.pdm-cache/*\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\")
+if [ -n \"$PYTHON_SCRIPTS\" ]; then
+    echo \"Checking Python scripts...\"
+    echo \"$PYTHON_SCRIPTS\" | xargs chmod +x
+    MISSING_SHEBANG_PY=$(echo \"$PYTHON_SCRIPTS\" | xargs grep -L \"^#!/usr/bin/env python3\" || true)
+    if [ ! -z \"$MISSING_SHEBANG_PY\" ]; then
+        echo \"ERROR: The following Python scripts are missing '#!/usr/bin/env python3' shebang:\"
+        echo \"$MISSING_SHEBANG_PY\"
+        exit 1
+    fi
+fi
+
+# 3. Add other checks here (e.g., running linters via pre-commit framework is preferred)
+# For example, if using the pre-commit framework, this script might just call 'pre-commit run'
+
+echo "Pre-commit checks passed."
+exit 0
+\\`\\`\\`
+
+## 代码审查 (Code Review)
+- 所有合并到 `develop` 和 `main` 分支的代码必须经过至少一名其他核心开发者的审查。
+- 审查者应关注代码质量、可读性、是否符合规范、测试覆盖率以及潜在的 bug。
+- PR 作者有责任回应审查意见并进行修改。
+
+## 版本控制 (Git)
+- **分支策略**: 遵循 Gitflow（或类似的 `main`/`develop`/`feature` 分支模型），详细描述见 `[开发与部署指南](mdc:DEPLOYMENT_GUIDE.md)`。
+- **提交信息**: 遵循 Conventional Commits 规范 (e.g., `feat: add user login endpoint`)。
+- **PR 模板**: (可选) 项目可定义一个 PR 模板 (`.github/pull_request_template.md`)。

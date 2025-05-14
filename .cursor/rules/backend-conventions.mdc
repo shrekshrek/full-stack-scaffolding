@@ -1,0 +1,388 @@
+---
+description: 
+globs: backend/**/*,*pyproject.toml,*alembic.ini
+alwaysApply: false
+---
+# 后端开发规范
+
+## 1. 技术栈与核心库
+- **Python 版本**: **3.11** (使用 PDM 管理的 Python 版本)
+- **Web 框架**: FastAPI
+- **AI 集成**: LangChain (使用最新版，侧重 LCEL 和 Chains)
+- **数据库 ORM**: SQLAlchemy (异步模式)
+    - 数据库迁移: Alembic (`[alembic.ini](mdc:backend/alembic.ini)`, `[alembic/](mdc:backend/alembic)`)
+- **缓存/消息队列等**: Redis (使用 `redis-py` 异步客户端)
+- **数据校验/序列化**: Pydantic (FastAPI 内置)
+- **包管理与依赖管理**: PDM (`[pyproject.toml](mdc:backend/pyproject.toml)`, `[pdm.lock](mdc:backend/pdm.lock)`)
+    - 命令: `pdm install`, `pdm add <package>`, `pdm run <script>`
+- **测试框架**: Pytest (配合 `pytest-asyncio` for async tests)
+- **代码格式化**: Black (配置在 `[pyproject.toml](mdc:backend/pyproject.toml)`)
+- **代码检查/Linter**: **Ruff** (项目统一使用 Ruff 进行 Linting、代码风格检查和自动修复。其配置在 `[pyproject.toml](mdc:backend/pyproject.toml)`)
+- **类型检查**: MyPy (配置在 `[pyproject.toml](mdc:backend/pyproject.toml)`)
+- **ASGI 服务器**: Uvicorn (用于开发和生产)
+- **环境变量管理**: `python-dotenv` 配合 Pydantic Settings (`[app/core/config.py](mdc:backend/app/core/config.py)`)
+
+## 2. 项目结构与文件命名 (功能优先的模块化)
+
+```
+[backend/](mdc:backend)
+├── pyproject.toml        # PDM 项目文件
+├── pdm.lock              # PDM lock 文件
+├── .env                  # 本地环境变量 (gitignored)
+├── .env.example          # 环境变量模板
+├── alembic.ini           # Alembic 配置
+├── alembic/              # Alembic 迁移脚本
+│   └── ...
+│
+├── [app/](mdc:backend/app)                  # 核心应用代码
+│   ├── __init__.py
+│   ├── [main.py](mdc:backend/app/main.py)             # FastAPI 应用创建, 全局中间件, 事件等
+│   ├── [core/](mdc:backend/app/core)               # 应用核心配置、共享组件
+│   │   ├── __init__.py
+│   │   ├── [config.py](mdc:backend/app/core/config.py)         # Pydantic Settings (环境变量管理)
+│   │   ├── [deps.py](mdc:backend/app/core/deps.py)           # FastAPI 依赖项 (get_db_session, get_current_user, get_redis_client)
+│   │   ├── [security.py](mdc:backend/app/core/security.py)       # 安全 (密码哈希, JWT)
+│   │   ├── [db.py](mdc:backend/app/core/db.py)             # SQLAlchemy async engine, SessionLocal
+│   │   └── [redis_client.py](mdc:backend/app/core/redis_client.py) # Redis client 初始化 (可选)
+│   │
+│   ├── [apis/](mdc:backend/app/apis)               # API 路由模块 (版本化)
+│   │   ├── __init__.py
+│   │   └── [v1/](mdc:backend/app/apis/v1)               # API 版本 v1
+│   │       ├── __init__.py
+│   │       ├── [endpoints/](mdc:backend/app/apis/v1/endpoints)      # 各功能模块的 API 路由
+│   │       │   ├── __init__.py
+│   │       │   ├── auth.py         # 认证 API (login, refresh_token)
+│   │       │   ├── users.py        # 用户管理 API (CRUD users)
+│   │       │   └── ai_service.py   # LangChain AI 服务 API
+│   │       └── schemas.py        # (可选) v1 版本级别共享 Pydantic schema
+│   │
+│   ├── [models/](mdc:backend/app/models)             # SQLAlchemy ORM 模型定义
+│   │   ├── __init__.py
+│   │   ├── base.py           # Declarative Base for ORM models, common columns (id, created_at, updated_at)
+│   │   ├── user.py           # User ORM model
+│   │   └── ...               # 其他 ORM 模型
+│   │
+│   ├── [schemas/](mdc:backend/app/schemas)            # Pydantic Schemas (请求/响应校验)
+│   │   ├── __init__.py
+│   │   ├── base.py           # 基础 Schema (e.g., IdMixin, TimestampMixin)
+│   │   ├── user.py           # User schemas (UserCreate, UserRead, UserUpdate)
+│   │   ├── token.py          # JWT token schemas (Token, TokenData)
+│   │   ├── msg.py            # 通用消息响应 schema (Message)
+│   │   └── ...               # 其他 Pydantic schemas
+│   │
+│   ├── [crud/](mdc:backend/app/crud)                # CRUD 数据库操作 (Repository 模式)
+│   │   ├── __init__.py
+│   │   ├── base.py           # 基础 AsyncCRUDBase 类 (提供通用 get, create, update, delete)
+│   │   ├── user.py           # CRUD operations for User model
+│   │   └── ...               # 其他模型的 CRUD 操作
+│   │
+│   ├── [services/](mdc:backend/app/services)           # 业务逻辑层
+│   │   ├── __init__.py
+│   │   ├── user_service.py   # User-related business logic
+│   │   └── ...               # 其他业务逻辑服务
+│   │
+│   ├── [langchain_module/](mdc:backend/app/langchain_module)     # LangChain 相关逻辑
+│   │   ├── __init__.py
+│   │   ├── [prompts/](mdc:backend/app/langchain_module/prompts)          # Prompt templates (.txt, .yaml, or .py)
+│   │   ├── [chains/](mdc:backend/app/langchain_module/chains)           # LangChain chains
+│   │   ├── [agents/](mdc:backend/app/langchain_module/agents)           # LangChain agents (if used)
+│   │   ├── [tools/](mdc:backend/app/langchain_module/tools)            # Custom LangChain tools
+│   │   ├── [llm.py](mdc:backend/app/langchain_module/llm.py)            # LLM 实例和配置 (e.g., OpenAI, Anthropic)
+│   │   └── utils.py          # LangChain 相关的工具函数
+│   │
+│   └── [worker/](mdc:backend/app/worker)             # (可选) Celery 或其他任务队列
+│       ├── __init__.py
+│       ├── celery_app.py
+│       └── tasks.py
+│
+├── [tests/](mdc:backend/tests)                # 测试代码
+│   ├── __init__.py
+│   ├── conftest.py         # Pytest 共享 fixtures (e.g., test_client, db_session_override)
+│   ├── test_main.py
+│   ├── apis/
+│   │   └── v1/
+│   │       └── endpoints/
+│   │           ├── test_auth.py
+│   │           └── ...
+│   ├── crud/
+│   │   └── test_user_crud.py
+│   └── ...
+│
+└── [scripts/](mdc:backend/scripts)              # 项目脚本
+    ├── run_dev.sh          # uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    ├── run_tests.sh        # pdm run pytest
+    ├── lint.sh             # pdm run black . && pdm run ruff . && pdm run mypy .
+    └── initial_data.py     # (可选) 初始化数据的脚本
+```
+
+- **命名约定总览**:
+    - **目录/包**: `snake_case` (Python 标准)。
+    - **Python 文件**: `snake_case.py`.
+    - **类名**: `PascalCase` (e.g., `UserCreate`, `UserService`, `AsyncCRUDBase`).
+    - **函数/方法名**: `snake_case()`.
+    - **变量名**: `snake_case`.
+    - **常量**: `UPPER_SNAKE_CASE`.
+    - **SQLAlchemy 模型类名**: `PascalCase` (e.g., `User`, `Item`).
+    - **Pydantic Schema 类名**: `PascalCase` (e.g., `UserRead`, `TokenData`).
+    - **FastAPI Routers 实例**: `router` (通常在各 `endpoints/*.py` 文件中)。
+    - **Alembic 迁移文件名**: 由 Alembic 自动生成，但描述应清晰。
+
+## 3. API 设计与开发规范 (FastAPI)
+- **RESTful 原则**: 尽可能遵循 RESTful 设计原则。
+    - 使用 HTTP 方法: `GET` (读取), `POST` (创建), `PUT` (更新/替换), `PATCH` (部分更新), `DELETE` (删除)。
+- **路径参数与查询参数**:
+    - 路径参数用于标识特定资源 (e.g., `/users/{user_id}`).
+    - 查询参数用于过滤、排序、分页 (e.g., `/items?skip=0&limit=10&sort_by=name`).
+- **请求体与响应体**:
+    - 使用 Pydantic模型 (`[schemas/](mdc:backend/app/schemas)`) 定义请求体和响应体，FastAPI 会自动进行数据校验和序列化。
+    - 响应模型 (`response_model` 参数) 应明确指定，以确保 API 契约和文档的准确性。
+- **HTTP 状态码**:
+    - `200 OK`: 通用成功。
+    - `201 Created`: 资源创建成功 (通常在 `POST` 后)。
+    - `204 No Content`: 操作成功，但无内容返回 (通常在 `DELETE` 后)。
+    - `400 Bad Request`: 客户端请求错误 (如数据校验失败)。
+    - `401 Unauthorized`: 未认证。
+    - `403 Forbidden`: 已认证但无权限访问。
+    - `404 Not Found`: 资源未找到。
+    - `422 Unprocessable Entity`: 请求格式正确，但语义错误 (FastAPI 默认校验错误状态码)。
+    - `500 Internal Server Error`: 服务器内部错误。
+- **API 版本控制**:
+    - 通过路径实现 (e.g., `/api/v1/...`)。路由组织在 `[app/apis/v1/](mdc:backend/app/apis/v1)`。
+- **路由组织 (`APIRouter`)**:
+    - 每个功能模块的端点定义在 `[app/apis/v1/endpoints/feature_name.py](mdc:backend/app/apis/v1/endpoints)`。
+    - 使用 `APIRouter` 实例，并用 `tags` 参数组织 OpenAPI 文档。
+    - 在 `[app/main.py](mdc:backend/app/main.py)` (或版本主路由文件如 `app/apis/v1/__init__.py`) 中 `include_router`。
+- **依赖注入 (FastAPI Depends)**:
+    - 广泛使用 FastAPI 的依赖注入系统 (`Depends`) 来处理数据库会话、认证、获取当前用户、Redis 客户端等。
+    - 依赖项定义在 `[app/core/deps.py](mdc:backend/app/core/deps.py)`.
+- **后台任务 (Background Tasks)**:
+    - 对于快速完成且不需要立即响应的任务，可以使用 FastAPI 的 `BackgroundTasks`。
+    - 对于更复杂的、长时间运行的或需要重试的任务，应使用 Celery (在 `[app/worker/](mdc:backend/app/worker)`)。
+- **错误处理**:
+    - 使用 FastAPI 的 `HTTPException` 来返回标准的 HTTP 错误。
+    - 可以定义自定义异常处理器 (`@app.exception_handler(...)`) 来处理特定类型的应用级异常。
+- **日志记录**:
+    - 配置 Python 内置的 `logging` 模块。
+    - 在关键操作、错误发生时记录日志。
+    - (可选) 集成结构化日志库如 `structlog`。
+
+## 4. 数据库规范 (SQLAlchemy & Alembic)
+- **异步操作**: 所有数据库交互必须使用异步方式 (`async/await`)。
+    - SQLAlchemy Engine: `create_async_engine` (在 `[app/core/db.py](mdc:backend/app/core/db.py)`)
+    - Session: `async_sessionmaker` 和 `AsyncSession` (在 `[app/core/db.py](mdc:backend/app/core/db.py)`)
+- **ORM 模型 (`[models/](mdc:backend/app/models)`)**:
+    - 所有模型继承自一个公共的 `Base` (在 `[app/models/base.py](mdc:backend/app/models/base.py)`)。
+    - 推荐在 `Base` 中包含通用字段如 `id` (主键), `created_at`, `updated_at`。
+    - 字段命名使用 `snake_case`。
+    - 定义清晰的表关系 (`relationship`).
+    - 使用类型提示。
+- **CRUD 层 (`[crud/](mdc:backend/app/crud)`)**:
+    - 封装直接的数据库交互逻辑。
+    - 为每个模型创建一个 CRUD 类或一组函数。
+    - 推荐创建一个 `CRUDBase` 类，包含通用的 `get`, `get_multi`, `create`, `update`, `remove` 方法，具体模型的 CRUD 类继承自它。
+    - CRUD 方法应接收 `AsyncSession` 和 Pydantic schema 作为参数。
+- **数据库会话管理**:
+    - 通过 FastAPI 依赖 (`Depends(get_db_session)`) 管理会话的生命周期 (请求开始时获取，请求结束时关闭/回滚)。
+- **数据库迁移 (Alembic)**:
+    - 模型发生变更后，使用 `pdm run alembic revision -m "description_of_change"` 生成迁移脚本。
+    - 使用 `pdm run alembic upgrade head` 应用迁移。
+    - 迁移脚本应保持简洁，仅包含必要的 schema 变更。
+- **事务管理**:
+    - 默认情况下，`get_db_session` 依赖应确保每个请求在单个事务中运行。
+    - 对于跨多个操作的复杂业务逻辑，在服务层显式管理事务（尽管通常依赖注入的会话会自动处理）。
+- **数据校验**:
+    - 业务层面的数据校验应在服务层或 Pydantic schema 中处理，而不是直接在 CRUD 层。
+
+## 5. LangChain 集成规范 (使用 Chains)
+- **核心依赖**:
+    - `langchain-core`: 包含核心抽象 (LCEL - LangChain Expression Language, Runnables, Messages 等)。
+    - `langchain-community`: 社区维护的集成 (LLMs, Document Loaders, Vector Stores 等)。
+    - 特定 LLM 包: 如 `langchain-openai`, `langchain-anthropic` (根据实际使用的 LLM)。
+    - (可选) 特定工具包: 如 `langchain-pinecone` (Vector Store), `langchain-google-search-results` (Tools)。
+- **组织结构 (`[app/langchain_module/](mdc:backend/app/langchain_module)`)**:
+    - **`llm.py`**:
+        - 初始化和配置 LLM 客户端实例 (e.g., `ChatOpenAI`, `ChatAnthropic`).
+        - 从 `[app/core/config.py](mdc:backend/app/core/config.py)` (Pydantic Settings) 安全地加载 API 密钥和模型参数 (model name, temperature, max_tokens 等)。
+        - 考虑提供一个工厂函数或可注入的依赖来获取配置好的 LLM 实例。
+    - **`prompts/`**:
+        - 存放提示模板。推荐使用 LangChain 的 `ChatPromptTemplate`, `HumanMessagePromptTemplate`, `SystemMessagePromptTemplate` 等。
+        - 可以是 `.py` 文件直接定义模板对象，或者 `.txt`/`.yaml` 文件由代码加载。
+        - 命名应清晰反映提示的用途 (e.g., `summarization_prompt.py`, `qa_with_context_prompt.txt`).
+        - 对于复杂的提示，考虑版本控制或将其参数化。
+    - **`chains/`**:
+        - 定义可复用的 LangChain Chains。**优先使用 LCEL (LangChain Expression Language)** 来构建 Chains，因为它提供了更好的可组合性、流式处理和异步支持。
+        - 示例: `RunnableSequence`, `RunnableParallel`, `RunnablePassthrough`.
+        - 每个 Chain 应封装在一个函数或类中，方便调用和测试。
+        - 文件命名: `feature_specific_chain.py` (e.g., `document_qa_chain.py`, `product_description_generator_chain.py`).
+        - 明确输入和输出 schema (可以使用 Pydantic 模型配合 `.with_types()`).
+    - **`tools/` (如果需要为 Chains 提供工具)**:
+        - 定义自定义工具 (`@tool`装饰器) 或集成现有工具。
+        - 工具应具有清晰的名称、描述和参数 schema (Pydantic)。
+    - **`utils.py`**: LangChain 相关的辅助函数，如自定义输出解析器 (`OutputParser`)，文档处理器等。
+- **Chain 构建 (LCEL - LangChain Expression Language)**:
+    - **强制使用 LCEL** 构建所有新的 Chains。避免使用旧版的 `LLMChain` 或 `SequentialChain` 等，除非有特定兼容性需求。
+    - 利用 LCEL 的 `|` (pipe) 操作符连接 Runnables (Prompts, LLMs, OutputParsers, other Runnables)。
+    - 使用 `RunnablePassthrough` 传递或添加数据到 Chain 的上下文中。
+    - 使用 `RunnableParallel` 并行执行操作。
+- **输入与输出**:
+    - Chains 的输入和输出应有明确的 Pydantic 模型定义，并通过 `.with_types()` 关联到 Chain，以获得类型安全和自动文档。
+    - 对于复杂的输出，编写自定义的 `OutputParser`。
+- **异步支持**:
+    - LangChain (尤其是 LCEL) 提供了良好的异步支持。所有与 LLM 交互的 Chain 操作都应使用异步方法 (`.ainvoke()`, `.astream()`, `.abatch()`).
+    - FastAPI 端点调用 LangChain 服务时也应使用 `await`.
+- **流式响应 (Streaming)**:
+    - 对于生成较长文本的 Chains (如聊天、内容生成)，**强烈推荐**实现流式响应。
+    - 使用 LangChain 的 `.astream()` 或 `.stream()` 方法。
+    - FastAPI 端点可以使用 `StreamingResponse` 将 LLM 的 token 流直接返回给客户端。
+- **错误处理**:
+    - 在调用 Chain (`.ainvoke()`, `.astream()`) 时使用 `try...except` 捕获可能发生的异常 (如 API 错误, 解析错误)。
+    - 将 LangChain 特有的异常转换为 FastAPI 的 `HTTPException` 或自定义的应用级异常。
+- **可观察性与日志**:
+    - (推荐) 集成 LangSmith (如果预算和需求允许) 或其他可观察性工具来追踪和调试 Chain 的执行。
+    - 在关键步骤（如 LLM 调用前后，工具使用）添加日志记录。
+- **配置管理**:
+    - LLM API 密钥、模型名称、默认参数等敏感或可变配置**必须**通过环境变量管理 (由 `[app/core/config.py](mdc:backend/app/core/config.py)` 加载)。
+    - 不得在代码中硬编码 API 密钥。
+- **测试**:
+    - 对 Chains 进行单元测试，mock LLM 调用以测试提示构建和输出解析逻辑。
+    - (可选) 对关键 Chains 进行集成测试，使用少量真实的 LLM 调用（注意成本和耗时）。
+
+## 6. Redis 使用规范
+- **客户端初始化**:
+    - 在 `[app/core/redis_client.py](mdc:backend/app/core/redis_client.py)` (或直接在 `[app/core/deps.py](mdc:backend/app/core/deps.py)`) 中初始化异步 Redis 客户端 (e.g., `redis.asyncio as redis`).
+    - 连接参数从 `[app/core/config.py](mdc:backend/app/core/config.py)` 读取。
+    - 提供一个 FastAPI 依赖 (`Depends(get_redis_client)`) 来获取 Redis 连接。
+- **主要用途**:
+    - **缓存**: 缓存数据库查询结果、API 响应、计算密集型操作结果等。
+        - 设置合理的过期时间 (TTL)。
+        - 考虑缓存失效策略。
+    - **限流 (Rate Limiting)**: (可选) 实现 API 限流逻辑。
+    - **会话管理**: (可选) 如果需要分布式会话。
+    - **任务队列 Broker/Backend**: (可选) 如果使用 Celery 且选择 Redis 作为 Broker。
+- **Key 命名约定**:
+    - 使用统一的前缀和分隔符，例如: `myapp:cache:user:{user_id}` or `myapp:ratelimit:ip:{ip_address}`.
+    - 保持 Key 简洁且具有描述性。
+- **数据序列化**:
+    - 存入 Redis 的复杂数据 (如 Pydantic 模型实例) 应先序列化 (e.g., to JSON string using `.model_dump_json()`)。
+    - 取出后进行反序列化 (e.g., `MyModel.model_validate_json()`).
+- **错误处理**:
+    - 在 Redis 操作周围使用 `try...except` 处理连接错误或操作失败。
+    - 应用应能在 Redis 不可用时优雅降级 (e.g., 缓存未命中则直接查库)。
+
+## 7. 代码风格与质量
+- **PEP 8**: 严格遵循 PEP 8 Python 代码风格指南。
+- **Black**:
+    - 项目统一使用 Black 进行代码格式化。配置在 `[pyproject.toml](mdc:backend/pyproject.toml)`.
+    - 行长推荐: 88 (Black 默认) 或 79。在 `pyproject.toml` 中设定。
+    - 在 CI/CD 流程中加入 Black 检查。
+- **Ruff**:
+    - 项目统一使用 Ruff 进行 Linting、代码风格检查和自动修复。其配置在 `[pyproject.toml](mdc:backend/pyproject.toml)`。
+    - Ruff 内置了对 Flake8 规则集、isort (导入排序)、pydocstyle (文档字符串检查) 等多种工具的支持，无需额外配置即可启用。
+    - 在 CI/CD 流程中加入 Ruff 检查。
+- **MyPy**:
+    - **强制使用类型提示 (Type Hinting)** for all functions, methods, and variables where feasible.
+    - 使用 MyPy进行静态类型检查。配置在 `[pyproject.toml](mdc:backend/pyproject.toml)`.
+    - 目标是 MyPy 检查无错误 (`--strict` 模式可以逐步引入)。
+    - 在 CI/CD 流程中加入 MyPy 检查。
+- **注释与文档字符串 (Docstrings)**:
+    - 公共模块、类、函数和方法**必须**有符合 Google Python Style Guide 或 reStructuredText 格式的文档字符串。
+    - 复杂的代码逻辑应有行内注释解释。
+    - Docstrings 应清晰说明用途、参数、返回值和可能抛出的异常。
+- **避免硬编码**:
+    - URL、API密钥、文件路径、魔法数字等**不得**硬编码。应使用 `[app/core/config.py](mdc:backend/app/core/config.py)` (Pydantic Settings) 从环境变量加载。
+- **导入顺序**:
+    - Ruff (with isort integration) 会自动处理导入排序。
+    - 标准顺序: Standard library -> Third-party libraries -> Local application/library specific imports.
+- **异常处理**:
+    - 捕获具体的异常类型，而不是泛泛的 `except Exception:`.
+    - 提供有意义的错误消息。
+
+## 8. 测试规范 (Pytest)
+- **测试文件位置**: `[tests/](mdc:backend/tests)` 目录，结构镜像 `app/` 目录。
+- **测试文件命名**: `test_*.py` (e.g., `test_auth.py`).
+- **测试函数命名**: `test_*()` (e.g., `test_create_user_successfully()`).
+- **Fixtures (`[tests/conftest.py](mdc:backend/tests/conftest.py)`)**:
+    - 定义可重用的测试装置 (fixtures)，如：
+        - `client`: FastAPI `TestClient` (同步或异步，如 `httpx.AsyncClient(app=app, base_url="http://test")`).
+        - `db_session_override`: 用于覆盖 `get_db_session` 依赖，提供一个测试数据库会话，并在测试后回滚。
+        - `redis_client_mock`: (如果需要) mock Redis 客户端。
+        - 示例数据创建 fixtures。
+- **异步测试**:
+    - 使用 `pytest-asyncio` 插件。测试函数标记为 `async def`.
+- **数据库测试**:
+    - **必须**使用独立的测试数据库，不得连接生产或开发数据库。
+    - 每个测试用例应在独立的事务中运行，并在测试结束后回滚，以确保测试之间的隔离性。 (可通过 `db_session_override` fixture 实现)。
+- **Mocking**:
+    - 使用 `unittest.mock.patch` 或 Pytest 的 `mocker` fixture 来 mock 外部服务依赖 (如第三方 API, LLM 调用, Redis)。
+- **API 测试 (端到端)**:
+    - 测试 API 端点的请求和响应，包括状态码、响应体内容、头部信息。
+    - 测试认证和授权逻辑。
+    - 测试各种有效和无效输入。
+- **单元测试**:
+    - 测试 `crud/`, `services/`, `langchain_module/chains/` (mocking LLM), `core/` 下的独立逻辑单元。
+- **覆盖率**:
+    - 使用 `pytest-cov` 插件。
+    - 目标覆盖率: (例如 >80%，根据项目要求设定)。
+    - 在 CI/CD 中检查覆盖率。
+- **断言**: 使用 Pytest 原生的 `assert` 语句。
+
+## 9. 安全规范
+- **身份验证 (Authentication)**:
+    - 使用 OAuth2 Password Bearer Flow with JWT tokens (`[app/core/security.py](mdc:backend/app/core/security.py)`, `[app/apis/v1/endpoints/auth.py](mdc:backend/app/apis/v1/endpoints/auth.py)`).
+    - JWTs 应包含 `sub` (subject, e.g., user ID), `exp` (expiration time).
+    - Access Token 应有较短的有效期 (e.g., 15-60 分钟)。
+    - (可选) 实现 Refresh Token 机制以获取新的 Access Token。Refresh Token 应有较长有效期并安全存储。
+    - `SECRET_KEY` 用于 JWT 签名，**必须**通过环境变量配置且足够复杂。
+- **授权 (Authorization)**:
+    - 实现基于角色或权限的访问控制。
+    - 可以在 FastAPI 依赖项中检查用户角色/权限。
+    - 例如: `Depends(get_current_active_superuser)` 或自定义 `PermissionChecker` 依赖。
+- **密码存储**:
+    - **绝不**存储明文密码。
+    - 使用 `passlib` (`[app/core/security.py](mdc:backend/app/core/security.py)`) 进行密码哈希和验证 (e.g., using `bcrypt`).
+- **输入校验**:
+    - FastAPI (Pydantic) 自动处理大部分请求体、路径参数、查询参数的类型和格式校验。
+    - 对于更复杂的业务规则校验，在 Pydantic 模型中使用 validators 或在服务层进行。
+    - 防范常见的注入攻击 (SQL 注入 - ORM 有一定防护, XSS - FastAPI 模板会自动转义)。
+- **依赖安全**:
+    - 定期使用 `pdm update --check-safety` 或 `safety check -r requirements.txt` (如果导出) 检查依赖库的安全漏洞。
+    - 及时更新存在漏洞的依赖。
+- **HTTPS**:
+    - 生产环境**必须**使用 HTTPS。由反向代理 (Nginx, Traefik) 处理 SSL 终止。
+- **CORS (Cross-Origin Resource Sharing)**:
+    - 在 `[app/main.py](mdc:backend/app/main.py)` 中配置 `CORSMiddleware`，仅允许受信任的前端源访问。
+- **速率限制 (Rate Limiting)**:
+    - 对敏感或资源消耗型 API 端点实施速率限制 (可使用 Redis + 方案如 `slowapi`).
+- **敏感数据处理**:
+    - 避免在日志中记录敏感信息 (如密码, API 密钥)。
+    - Pydantic 模型可以定义字段在序列化时排除 (`exclude=True`).
+
+## 10. 部署与运维
+- **Docker (`[Dockerfile](mdc:backend/Dockerfile)`)**:
+    - 使用多阶段构建，减小最终镜像体积。
+        - 第一阶段: 构建环境，安装 PDM 依赖，编译等。
+        - 第二阶段: 生产环境，仅复制必要的运行时文件和依赖到轻量级基础镜像 (e.g., `python:3.11-slim`).
+    - 非 root 用户运行应用。
+    - 正确处理 `CMD` 和 `ENTRYPOINT`。
+    - `EXPOSE` 正确的端口。
+- **ASGI 服务器 (Uvicorn)**:
+    - 生产环境推荐使用 Uvicorn 配合 Gunicorn (作为进程管理器) 或 Uvicorn 的多 worker 模式。
+    - `uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4` (示例)。
+    - 配置参数 (workers, logging) 应通过环境变量或配置文件管理。
+- **环境变量**:
+    - **严格区分**不同环境 (dev, test, prod) 的配置。
+    - 生产环境的敏感变量 (数据库密码, API 密钥, `SECRET_KEY`) **必须**通过安全的方式注入 (如 K8s Secrets, Vault, PaaS 平台的环境变量配置)。
+- **数据库迁移 (Alembic)**:
+    - 在部署流程中，应在应用启动前运行 `alembic upgrade head`。
+    - 强调在CI/CD流程中自动化此步骤的重要性，例如在后端服务容器启动命令前执行迁移，或通过 `docker-compose exec backend pdm run alembic upgrade head`。
+- **CI/CD**:
+    - 自动化测试 (Pytest)、代码格式化/Linting/类型检查 (Black, Ruff, MyPy)。
+    - 自动化构建 Docker 镜像并推送到镜像仓库 (如 Docker Hub, AWS ECR, GitHub Packages)。
+    - 自动化部署到测试和生产环境 (参考后续的开发部署文档)。
+- **日志聚合与监控**:
+    - (推荐) 将应用日志发送到集中的日志管理系统 (e.g., ELK Stack, Grafana Loki, Datadog).
+    - (推荐) 集成应用性能监控 (APM) 工具 (e.g., Sentry, Datadog, Prometheus + Grafana).
+- **本地开发与测试服务器部署流程要点**:
+    - CI服务器负责构建生产级Docker镜像并推送到镜像仓库。
+    - 测试服务器通过Docker (推荐使用Docker Compose)拉取最新镜像进行部署。
+    - **强调**: 在代码合并到触发测试环境部署的分支前，开发者应在本地完成单元测试、必要的集成测试，并推荐进行一次本地完整的端到端集成验证 (例如使用 `docker-compose` 启动所有相关服务)。

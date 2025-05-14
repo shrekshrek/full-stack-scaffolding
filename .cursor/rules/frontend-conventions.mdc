@@ -1,0 +1,196 @@
+---
+description: 
+globs: frontend/**/*,*.vue,*vite.config.*,*uno.config.*
+alwaysApply: false
+---
+# 前端开发规范
+
+## 1. 技术栈与工具
+- **构建工具**: Vite (`[vite.config.ts](mdc:frontend/vite.config.ts)`)
+- **语言**: TypeScript (`[tsconfig.json](mdc:frontend/tsconfig.json)`)
+- **UI 框架**: Vue 3 with **Element Plus**.
+    - Element Plus 组件按需引入 (通常由 `unplugin-vue-components` 自动处理，如 `[components.d.ts](mdc:frontend/components.d.ts)` 所示)。
+- **CSS方案**: **UnoCSS** (`[uno.config.ts](mdc:frontend/uno.config.ts)`) - 优先使用原子化类。Element Plus 样式定制可通过 CSS 变量或 UnoCSS 规则覆盖。
+- **状态管理**: **Pinia**
+- **路由**: Vue Router
+- **测试框架**: **Vitest**
+- **代码规范**:
+    - ESLint (`[.eslintrc.cjs](mdc:frontend/.eslintrc.cjs)`)
+    - Prettier (`[.prettierrc.json](mdc:frontend/.prettierrc.json)`)
+- **包管理器**: pnpm (遵循通用规范 `[../project-conventions.mdc](mdc:.cursor/rules/project-conventions.mdc)`)
+
+## 2. 目录结构与文件命名 (功能优先)
+
+```
+[frontend/src/](mdc:frontend/src)
+├── main.ts                 # 应用入口 (确保 Element Plus, Pinia, Vue Router 初始化)
+├── App.vue                 # 根 Vue 组件
+├── router.ts               # 主路由配置 (导入各功能模块的路由)
+├── store.ts                # 主 Pinia 实例配置 (如果需要全局注册)
+│
+├── assets/                 # 全局静态资源 (字体、全局图片等)
+│   └── (kebab-case)        # e.g., project-logo.svg
+│
+├── core/                   # 核心/共享模块
+│   ├── services/           # 基础 API 客户端, 核心服务 (e.g., apiClient.ts)
+│   │   └── (camelCase.service.ts) # e.g., notificationService.ts
+│   ├── utils/              # 全局通用的工具函数 (e.g., date.utils.ts, string.utils.ts)
+│   │   └── (camelCase.utils.ts OR feature.utils.ts)
+│   ├── composables/        # 全局可复用的 Vue Composables (e.g., useBreakpoints.ts)
+│   │   └── (useCamelCase.ts)
+│   ├── layouts/            # 全局布局组件
+│   │   └── (PascalCaseLayout.vue) # e.g., DefaultLayout.vue, DashboardLayout.vue
+│   ├── ui/                 # 全局UI原子/基础组件 (基于或不基于 Element Plus)
+│   │   └── (BasePascalCase.vue OR AppPascalCase.vue) # e.g., BaseButton.vue, AppIcon.vue
+│   └── types/              # 全局共享的 TypeScript 类型定义
+│       └── (global.types.ts OR core.types.ts)
+│
+├── features/               # ---- 所有业务功能模块 ----
+│   ├── auth/               # 示例: 认证功能模块
+│   │   ├── components/     # 特定于认证的组件 (LoginForm.vue)
+│   │   │   └── (PascalCase.vue)
+│   │   ├── views/          # 认证相关的页面/视图 (LoginView.vue)
+│   │   │   └── (PascalCaseView.vue)
+│   │   ├── store.ts        # 认证模块的 Pinia store (auth.store.ts)
+│   │   ├── services.ts     # 调用认证API的服务 (auth.api.ts)
+│   │   ├── composables.ts  # 特定于认证的 Composables (useAuthForm.ts)
+│   │   ├── routes.ts       # 认证模块的子路由配置
+│   │   ├── types.ts        # 认证模块的类型定义
+│   │   └── index.ts        # (可选) 模块出口，用于统一导出
+│   │
+│   ├── user-profile/       # 示例: 用户个人资料模块
+│   │   └── ... (类似 auth 模块结构)
+│   │
+│   └── (another-feature)/  # 其他功能模块...
+│       └── ...
+│
+├── styles/                 # 全局样式, Element Plus 主题覆盖, UnoCSS 自定义
+│   ├── main.scss           # (或 .css) 主样式入口
+│   ├── _variables.scss     # (或 .css) 自定义CSS变量
+│   ├── element-plus.scss   # (或 .css) Element Plus 主题变量覆盖
+│   └── uno-custom.css      # (可选) UnoCSS 额外自定义样式
+│
+├── types/                  # 自动生成的全局 .d.ts 文件 (vite-env.d.ts, components.d.ts, auto-imports.d.ts)
+│                           # (这些通常由 Vite 插件维护)
+│
+└── [uno.config.ts](mdc:frontend/uno.config.ts)           # UnoCSS 配置
+└── [vite.config.ts](mdc:frontend/vite.config.ts)          # Vite 配置 (确保 Vitest 配置也在此或单独文件)
+└── [tsconfig.json](mdc:frontend/tsconfig.json)           # TypeScript 配置
+```
+
+- **命名约定总览**:
+    - **目录**: `kebab-case` (e.g., `user-profile`, `core`) 或 `camelCase` (较少见于目录)。`features` 下的模块名通常为 `kebab-case`。
+    - **Vue 组件**: `PascalCase.vue` (e.g., `UserProfileCard.vue`, `DefaultLayout.vue`).
+        - `core/ui/` 下的通用基础组件可加前缀 `Base` 或 `App` (e.g., `BaseButton.vue`).
+    - **Composables**: `useCamelCase.ts` (e.g., `useFormValidation.ts`).
+    - **Pinia Stores**:
+        - 文件: 在 `features/feature-name/` 下通常为 `store.ts` 或 `featureName.store.ts`.
+        - Store ID: `camelCase` (e.g., `userAuth`, `productCart`).
+        - Getter/Action 命名: (见 Pinia 规范部分)。
+    - **Service/API 文件**: 在 `features/feature-name/` 下通常为 `services.ts` 或 `featureName.api.ts`。函数名应清晰。
+    - **路由配置文件**:
+        - 主路由: `router.ts` 在 `src/` 下。
+        - 功能模块路由: `routes.ts` 在 `features/feature-name/` 下。
+    - **TypeScript 文件 (.ts)**: `camelCase.ts` 或 `kebab-case.ts` (除组件、特定模式如 store 外)。类型定义文件可为 `featureName.types.ts` 或 `types.ts`。
+    - **测试文件**: `*.spec.ts` 或 `*.test.ts`，通常与被测试文件同目录或在 `__tests__` 子目录内。
+        - 例如 `[frontend/src/features/auth/components/LoginForm.spec.ts](mdc:frontend/src/features/auth/components/LoginForm.spec.ts)`
+
+## 3. 组件开发规范 (Vue & Element Plus)
+- **优先使用 Element Plus**: 对于常见的 UI 需求，应首先考虑 Element Plus。
+- **自定义组件位置**:
+    - **全局可复用基础组件**: 放置于 `[src/core/ui/](mdc:frontend/src/core/ui)`.
+    - **特定功能模块组件**: 放置于相应 `[src/features/feature-name/components/](mdc:frontend/src/features/feature-name/components)`.
+- **单文件组件 (SFC)**: 遵循 `<template>`, `<script setup lang="ts">`, `<style scoped>` 的顺序。
+- **Props**:
+    - 使用 TypeScript 定义类型。
+    - 尽可能提供 `default` 值。
+    - 对于 `Boolean`类型的 prop，如果其存在即为 `true`，则 `default` 应为 `false`。
+- **Emits**:
+    - 使用 `<script setup>` 中的 `defineEmits`，并提供类型校验。
+- **Slots**:
+    - 明确命名插槽。
+- **命名**:
+    - 自定义组件名 (PascalCase): 多个单词组成。
+    - Prop 名 (camelCase)。
+    - Event 名 (kebab-case): 避免使用原生事件名。
+- **可访问性 (A11y)**:
+    - Element Plus 组件通常内置了良好的可访问性支持。
+    - 对于自定义组件，确保所有交互元素都是键盘可访问的，为图片和图标提供 `alt` 文本，使用语义化的 HTML 标签。
+- **UnoCSS 使用**:
+    - 优先使用 UnoCSS 原子类进行布局和微调。
+    - 对于 Element Plus 组件的样式微调，可尝试使用 UnoCSS 的 `@apply` 指令或直接通过 CSS 变量覆盖。
+    - 复杂的、可复用的样式组合，考虑使用 UnoCSS 的快捷方式 (shortcuts) 定义在 `[uno.config.ts](mdc:frontend/uno.config.ts)`。
+- **Element Plus 主题与样式定制**:
+    - 全局主题色、字体、边框等主要通过修改 Element Plus 提供的 CSS 变量进行。
+    - 避免直接修改 Element Plus 组件的内部类名，除非万不得已，因为这可能在库版本更新后失效。优先使用官方推荐的定制方法。
+
+## 4. 状态管理规范 (Pinia)
+- **Store 定义位置**:
+    - **特定功能模块 Store**: 定义在 `[src/features/feature-name/store.ts](mdc:frontend/src/features/feature-name/store.ts)`.
+    - **全局共享 Store** (较少见，如有必要): 可放在 `[src/core/store/globalStore.ts](mdc:frontend/src/core/store/globalStore.ts)`.
+- **Store 定义**:
+    - 使用 `defineStore('storeId', { state, getters, actions })` 或 Setup Store 风格。
+    - `storeId` 应全局唯一，推荐使用 `camelCase` 或 `kebab-case`。
+- **State**:
+    - 定义为函数以确保 SSR 兼容性。
+    - 保持 state 结构扁平化，除非有明确的嵌套需求。
+- **Getters**:
+    - 用于派生状态，类似计算属性。
+    - 接收 `state` 作为第一个参数。
+- **Actions**:
+    - 可以是异步的 (`async/await`)。
+    - 用于提交 `mutations` (在 Option Store 风格中) 或直接修改 `state` (在 Setup Store 风格或 Option Store 中)。
+    - 封装业务逻辑，保持组件简洁。
+- **模块化**: 按功能模块自然实现。
+
+## 5. API 调用规范
+- **Service 文件位置**:
+    - **特定功能模块 API 服务**: `[src/features/feature-name/services.ts](mdc:frontend/src/features/feature-name/services.ts)` (或 `*.api.ts`).
+    - **核心/通用 API 客户端配置**: `[src/core/services/apiClient.ts](mdc:frontend/src/core/services/apiClient.ts)`.
+- **统一处理**: 建议在上述 service 文件中或通过封装的 `axios` / `fetch` 实例中统一处理 API 请求、响应和错误。
+    - `apiClient.ts` 中可配置基础 URL、拦截器 (请求头、错误处理、token刷新等)。
+- **Loading 与错误状态**: 组件或 Pinia store 应妥善处理 API 调用的加载状态和错误状态，并反馈给用户。
+- **环境变量**: API 基地址等应通过环境变量配置 (`[.env.development](mdc:.env.development)`等)，并通过 `import.meta.env` 在 Vite 中访问。
+
+## 6. 代码风格与质量
+- **ESLint & Prettier**: 强制执行，确保提交前代码符合规范。
+- **TypeScript**:
+    - 避免使用 `any` 类型，除非绝对必要且有注释说明。
+    - 利用 `interface` 和 `type` 定义数据结构。
+    - 启用并遵循 `[tsconfig.json](mdc:frontend/tsconfig.json)` 中的严格类型检查选项。
+    - 善用 Element Plus 提供的 TypeScript 类型支持。
+    - 功能模块的类型定义放在 `[src/features/feature-name/types.ts](mdc:frontend/src/features/feature-name/types.ts)`.
+    - 全局类型定义放在 `[src/core/types/](mdc:frontend/src/core/types)`.
+- **注释**:
+    - 为复杂的逻辑、重要的函数、自定义组件 props/emits、Pinia store 模块添加 JSDoc 风格的注释。
+    - 保持注释的简洁和更新。
+- **UnoCSS**:
+    - 保持类名排序一致 (如果 ESLint/Prettier 插件支持)。
+    - 避免使用与自定义样式冲突或难以理解的原子类组合。
+
+## 7. 测试规范 (Vitest)
+- **测试文件位置**:
+    - 通常与被测试文件同级或在 `__tests__` 子目录内。
+    - 例如: `[frontend/src/features/auth/components/__tests__/LoginForm.spec.ts](mdc:frontend/src/features/auth/components/__tests__/LoginForm.spec.ts)`
+- **测试类型**:
+    - **单元测试**:
+        - 针对 `composables` (全局及功能模块内)。
+        - 针对 `utils` (全局及功能模块内)。
+        - 针对 Pinia stores 的 state、getters、actions。
+    - **组件测试**:
+        - 使用 `@vue/test-utils` 配合 Vitest。
+        - 测试自定义组件 (`core/ui/` 及 `features/*/components/`) 的渲染、交互、props 传递、事件触发。
+        - 测试集成了 Element Plus 组件的页面或复杂组件时，主要关注业务逻辑的正确性。
+- **覆盖率**: 设定合理的测试覆盖率目标，并使用 Vitest 的覆盖率报告工具。
+- **Mocking**:
+    - 使用 Vitest 的 `vi.mock` 来 mock 依赖项 (如 API 服务、浏览器 API)。
+- **快照测试**: 谨慎使用，确保快照易于维护和理解。
+
+## 8. Git Hooks
+- 推荐使用 `lint-staged` 配合 `husky` (或类似的工具) 在 `pre-commit` 钩子中运行 ESLint, Prettier, 和 Vitest (针对暂存文件).
+- (可参考通用规范中的 `pre-commit` 脚本 `[../project-conventions.mdc](mdc:.cursor/rules/project-conventions.mdc)`)
+
+## 9. Docker
+- `[Dockerfile](mdc:frontend/Dockerfile)` 和 `[nginx.conf](mdc:frontend/nginx.conf)` 用于构建和部署。
+- 确保 `Dockerfile` 使用多阶段构建以减小最终镜像体积。
+- `.dockerignore` 文件应包含 `node_modules`, `dist`, `.env*` (除非特定 .env 用于构建时) 等。
