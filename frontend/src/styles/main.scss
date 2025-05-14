@@ -1,0 +1,65 @@
+/* Base styles, resets, and global utilities */
+
+/* Import UnoCSS entry point if not handled by Vite plugin directly in main.ts */
+/* Some setups might require explicit import of UnoCSS generated stylesheet here or in main.ts */
+/* @import 'uno.css'; */ /* This would typically be the generated UnoCSS file */
+
+/* Import Element Plus base styles (if not fully handled by unplugin-vue-components) */
+/* You might not need this if AutoImport and Components plugins handle all necessary CSS */
+/* @import 'element-plus/theme-chalk/base.css'; */
+
+/* Global HTML and Body styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  font-size: 16px;
+  color: #333; /* Default text color */
+  background-color: #f4f6f8; /* Example light background */
+}
+
+/* Basic reset for common elements */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+a {
+  color: #007bff; /* Example link color */
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Global container class (optional, UnoCSS can handle this with @apply or utilities) */
+/* .container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) { .container { max-width: 540px; } }
+@media (min-width: 768px) { .container { max-width: 720px; } }
+@media (min-width: 992px) { .container { max-width: 960px; } }
+@media (min-width: 1200px) { .container { max-width: 1140px; } } */
+
+/* Element Plus Variable Overrides (example) */
+/* These should be SCSS variables if using the SCSS way, or CSS variables for the CSS var way */
+/* 
+:root {
+  --el-color-primary: #your-custom-primary-color;
+  --el-font-size-base: 14px;
+}
+*/
+
+/* Custom UnoCSS utilities or @apply directives can also go here or in uno-custom.css */
+
+/* Placeholder for _variables.scss content if you choose to use it */
+
+/* Placeholder for element-plus.scss content if you choose to use it */
+
+/* Placeholder for uno-custom.css content if you choose to use it */ 

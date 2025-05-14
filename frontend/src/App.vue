@@ -1,57 +1,48 @@
-<script setup lang="ts">
-import { onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { ElNotification } from 'element-plus'
-import MainLayout from '@/layouts/MainLayout.vue'
-
-const authStore = useAuthStore()
-
-// 应用启动时检查是否已登录
-onMounted(async () => {
-  if (localStorage.getItem('token')) {
-    try {
-      await authStore.fetchCurrentUser()
-    } catch (error: any) {
-      console.error('加载用户信息失败', error)
-
-      ElNotification({
-        title: '用户会话已过期',
-        message: '请重新登录以继续使用',
-        type: 'warning'
-      })
-    }
-  }
-})
-</script>
-
 <template>
-  <div class="app-container">
-    <MainLayout>
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-    </MainLayout>
-  </div>
+  <!-- 
+    The router-view will render the component corresponding to the current URL.
+    You can wrap it with layout components or global UI elements here.
+    Example: Using a dynamic layout based on route meta
+  -->
+  <!-- <component :is="$route.meta.layout || 'div'"> -->
+    <router-view />
+  <!-- </component> -->
 </template>
 
-<style>
-.app-container {
-  width: 100% !important;
-  min-height: 100vh !important;
-  background-color: #ffffff !important; /* 强制使用白色背景 */
-  display: block !important;
-  overflow-x: hidden !important; /* 防止水平滚动条 */
+<script setup lang="ts">
+// This is the main App component.
+// You can import global styles or setup global providers here if needed.
+// For example, to listen to route changes for layouts (though meta fields are often better):
+// import { computed } from 'vue'
+// import { useRoute } from 'vue-router'
+// import DefaultLayout from '@/core/layouts/DefaultLayout.vue' // Example layout
+
+// const route = useRoute()
+// const layout = computed(() => {
+//   return route.meta.layout || DefaultLayout // Default to DefaultLayout if no meta.layout
+// });
+
+// console.log("App.vue mounted");
+</script>
+
+<style lang="scss">
+/* 
+  Global styles can be placed here or in a separate `styles/global.scss` imported in `main.ts`.
+  It's often cleaner to keep this file focused on the App shell 
+  and manage global styles, resets, and utilities in the `styles` directory.
+*/
+
+/* Example: Basic reset or body styling (better in styles/main.scss or styles/_reset.scss) */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2c3e50; /* Example text color */
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+#app {
+  /* Styles for the main app container if needed */
+  /* text-align: center; */ /* Example */
 }
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
+</style> 

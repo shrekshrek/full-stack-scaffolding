@@ -1,11 +1,27 @@
 {
-  "semi": false,
   "singleQuote": true,
+  "semi": false,
   "tabWidth": 2,
-  "trailingComma": "none",
+  "useTabs": false,
+  "trailingComma": "es5",
   "printWidth": 100,
-  "endOfLine": "auto",
-  "htmlWhitespaceSensitivity": "ignore",
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "endOfLine": "lf",
   "vueIndentScriptAndStyle": false,
-  "bracketSpacing": true
+  "overrides": [
+    {
+      "files": "*.md",
+      "options": {
+        "printWidth": 120,
+        "proseWrap": "preserve"
+      }
+    },
+    {
+      "files": "*.json",
+      "options": {
+        "printWidth": 120
+      }
+    }
+  ]
 } 

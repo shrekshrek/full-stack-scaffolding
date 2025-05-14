@@ -1,0 +1,114 @@
+[project]
+name = "my_backend_project"
+version = "0.1.0"
+description = "Backend for the project."
+authors = [
+    {name = "Your Name", email = "you@example.com"},
+]
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.20.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "asyncpg", # For PostgreSQL, or use "aiomysql" for MySQL, "aiosqlite" for SQLite
+    "alembic>=1.9.0",
+    "redis[hiredis]>=5.0.0", # For redis-py async client
+    "langchain>=0.1.0",     # Or more specific langchain packages
+    "langchain-openai",     # Example LLM provider
+    # Add other dependencies here
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.20.0",
+    "httpx>=0.24.0", # For TestClient
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "celery>=5.0.0", # If using Celery worker
+    "flower>=1.0.0", # For Celery monitoring
+]
+
+[project.scripts]
+start_dev = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+run_tests = "pytest"
+run_lint = "ruff check . && black --check . && mypy ."
+apply_lint = "ruff check . --fix && black ."
+db_migrate = "alembic upgrade head"
+db_revision = "alembic revision -m" # Usage: pdm run db_revision "your message"
+
+[build-system]
+requires = ["pdm-pep517>=1.0"]
+build-backend = "pdm.pep517.api"
+
+[tool.pdm]
+python_version = "3.11" # Ensure this matches project.requires-python
+
+[tool.black]
+line-length = 88
+# include = '\\.pyi?$'
+# exclude = '''
+# /(
+#     \\.git
+#   | \\.hg
+#   | \\.mypy_cache
+#   | \\.tox
+#   | \\.venv
+#   | _build
+#   | buck-out
+#   | build
+#   | dist
+# )/
+# '''
+
+[tool.ruff]
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C90", # mccabe complexity
+    "N",  # pep8-naming
+    "D",  # pydocstyle
+    "UP", # pyupgrade
+    "PT", # pytest-style
+    "SIM",# flake8-simplify
+    "TID",# flake8-tidy-imports
+    "ARG",# flake8-unused-arguments
+    "PTH",# flake8-use-pathlib
+    "TRY",# tryceratops
+    "RUF",# Ruff-specific rules
+]
+ignore = [
+    "D100", "D104", # Missing docstring in public package/module
+    "D107", # Missing docstring in __init__
+    "D203", "D212", # Conflicts with other rules or black
+]
+
+[tool.ruff.isort]
+known_first_party = ["app"] # Adjust if your main package has a different name
+
+[tool.ruff.pydocstyle]
+convention = "google" # or "numpy", "pep257"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true # Recommended for smoother adoption, can be set to false later
+# strict = true # Enable for stricter checks, may require more type hinting initially
+# exclude = ["alembic/env.py"] # Example: exclude specific files if they cause issues
+
+# Per-module settings (optional)
+# [[tool.mypy.overrides]]
+# module = "*.migrations.*" # Example for Alembic migrations
+# ignore_errors = true
+    

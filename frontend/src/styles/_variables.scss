@@ -1,0 +1,43 @@
+// SCSS Variables
+
+// Example: Define custom colors that can be used in SCSS and potentially by UnoCSS theme
+// $primary-color: #007bff;
+// $secondary-color: #6c757d;
+// $success-color: #28a745;
+// $danger-color: #dc3545;
+// $warning-color: #ffc107;
+// $info-color: #17a2b8;
+
+// Example: Font stacks
+// $font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+// $font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+// Example: Breakpoints (can be used with UnoCSS @screen directive if theme is configured)
+// $breakpoint-sm: 576px;
+// $breakpoint-md: 768px;
+// $breakpoint-lg: 992px;
+// $breakpoint-xl: 1200px;
+
+// Element Plus SCSS variable overrides (if using SCSS method for Element Plus theming)
+// Ensure you import Element Plus SCSS variables first if you are overriding them this way.
+// For example, if Element Plus is installed and its SCSS files are accessible:
+// @forward "element-plus/theme-chalk/src/common/var.scss" with (
+//   $colors: (
+//     'primary': (
+//       'base': #your-custom-primary-color, // Replace with your color
+//     ),
+//     'success': (
+//       'base': #your-custom-success-color,
+//     ),
+//   ),
+//   $font-size: (
+//     'base': 14px,
+//   )
+//   // Add other variable overrides here
+// );
+
+// Note: The modern way to customize Element Plus is often via CSS Variables.
+// If using CSS Variables, overrides are typically done in a CSS/SCSS file by setting :root variables,
+// e.g., in main.scss or element-plus.scss (see frontend-conventions.mdc for details).
+
+// console.log('SCSS variables loaded (_variables.scss)'); 

@@ -1,98 +1,49 @@
-import {
-  defineConfig,
-  presetUno,
-  presetAttributify,
-  presetIcons,
-  presetTypography,
-  presetWebFonts
-} from 'unocss'
+import { defineConfig, presetAttributify, presetIcons, presetUno, transformerDirectives, transformerVariantGroup } from 'unocss'
+
+// Potentially Element Plus theme variables for UnoCSS integration
+// import { epTheme } from '@unocss/preset-mini/theme' 
 
 export default defineConfig({
-  theme: {
-    colors: {
-      primary: {
-        DEFAULT: '#409eff',
-        50: '#ecf5ff',
-        100: '#d9ecff',
-        200: '#c6e2ff',
-        300: '#a0cfff',
-        400: '#79bbff',
-        500: '#409eff',
-        600: '#337ecc',
-        700: '#2a5e99',
-        800: '#213e66',
-        900: '#0f1f33',
-        950: '#071426'
-      },
-      success: {
-        DEFAULT: '#67c23a',
-        light: '#f0f9eb'
-      },
-      warning: {
-        DEFAULT: '#e6a23c',
-        light: '#fdf6ec'
-      },
-      danger: {
-        DEFAULT: '#f56c6c',
-        light: '#fef0f0'
-      },
-      info: {
-        DEFAULT: '#909399',
-        light: '#f4f4f5'
-      }
-    }
-  },
-  shortcuts: {
-    // 常用布局
-    'flex-center': 'flex items-center justify-center',
-    'flex-between': 'flex items-center justify-between',
-
-    // 按钮 - 与Element Plus风格一致
-    btn: 'px-4 py-2 rounded font-medium transition-colors',
-    'btn-primary': 'btn bg-primary text-white hover:bg-primary-600',
-    'btn-success': 'btn bg-success text-white hover:bg-success/90',
-    'btn-warning': 'btn bg-warning text-white hover:bg-warning/90',
-    'btn-danger': 'btn bg-danger text-white hover:bg-danger/90',
-    'btn-info': 'btn bg-gray-500 text-white hover:bg-gray-600',
-    'btn-secondary': 'btn bg-gray-200 text-gray-800 hover:bg-gray-300',
-    'btn-text': 'bg-transparent hover:bg-gray-100 text-gray-700 transition-colors',
-
-    // 卡片
-    card: 'bg-white dark:bg-gray-800 rounded-lg shadow p-4 transition-all',
-    'card-hover': 'card hover:shadow-md cursor-pointer',
-
-    // 输入框
-    input:
-      'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary'
-  },
+  // shortcuts: [
+  //   // you can customize your shortcuts here
+  //   // example:
+  //   // ['btn', 'px-4 py-1 rounded inline-block bg-teal-600 text-white cursor-pointer hover:bg-teal-700 disabled:cursor-default disabled:bg-gray-600 disabled:opacity-50'],
+  //   // ['btn-green', 'btn bg-green-500 hover:bg-green-600'],
+  // ],
   presets: [
-    presetUno(),
-    presetAttributify(),
-    presetIcons({
+    presetUno(), // Basic UnoCSS preset (Tailwind CSS like utilities)
+    presetAttributify(), // Enables Attributify mode (e.g. <div text-sm font-bold />)
+    presetIcons({ // Enables Iconify integration
       scale: 1.2,
-      extraProperties: {
-        display: 'inline-block',
-        'vertical-align': 'middle'
-      }
+      warn: true,
+      // collections: { // Example: specify collections to reduce bundle size
+      //   mdi: () => import('@iconify-json/mdi/icons.json').then(i => i.default),
+      //   carbon: () => import('@iconify-json/carbon/icons.json').then(i => i.default)
+      // }
     }),
-    presetTypography(),
-    presetWebFonts({
-      fonts: {
-        sans: 'Inter:400,500,600,700'
-      }
-    })
   ],
-  safelist: [
-    // 这里添加一些你希望无论使用与否都要包含在构建中的类
-    'text-primary',
-    'bg-primary',
-    'text-success',
-    'bg-success',
-    'text-warning',
-    'bg-warning',
-    'text-danger',
-    'bg-danger',
-    'text-info',
-    'bg-info'
-  ]
-})
+  transformers: [
+    transformerDirectives(), // Enables @apply, @screen, theme()
+    transformerVariantGroup(), // Enables (hover:bg-red-500 text-white) syntax
+  ],
+  // theme: {
+  //   extend: {
+  //     colors: {
+  //       // primary: epTheme.colors.primary, // Example: using Element Plus primary color
+  //       // 'custom-blue': '#2474ff'
+  //     },
+  //     fontFamily: {
+  //       // sans: ['YourCustomFont', ...epTheme.fontFamily.sans],
+  //     },
+  //   },
+  // },
+  // rules: [
+  //   // Add custom rules here if needed
+  //   // [/^m-(\d+)$/, ([_, d]) => ({ margin: `${d / 4}rem` })],
+  // ],
+  // safelist: 
+  //   'prose prose-sm m-auto text-left'.split(' ')
+  //   .concat(
+  //      ['grid', 'gap-4', 'grid-cols-1', 'sm:grid-cols-2', 'md:grid-cols-3'] // Common layout classes
+  //   ),
+}) 

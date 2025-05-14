@@ -1,10 +1,16 @@
 {
   "compilerOptions": {
     "composite": true,
-    "skipLibCheck": true,
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "types": ["node"]
   },
-  "include": ["vite.config.ts"]
-}
+  "include": [
+    "vite.config.ts", 
+    "uno.config.ts", 
+    // "vitest.setup.ts" // if you have one
+    // any other .ts or .js files at the root that are part of the build/dev tooling
+  ]
+} 

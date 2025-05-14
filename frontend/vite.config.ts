@@ -1,99 +1,67 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
+
+// Element Plus 按需引入插件
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import viteCompression from 'vite-plugin-compression'
-import { visualizer } from 'rollup-plugin-visualizer'
+
+// UnoCSS 插件
 import UnoCSS from 'unocss/vite'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  const isProd = mode === 'production'
-
-  return {
-    plugins: [
-      // Vue 3 支持
-      vue(),
-
-      // UnoCSS
-      UnoCSS(),
-
-      // 自动导入Element Plus组件
-      AutoImport({
-        resolvers: [ElementPlusResolver()]
-      }),
-      Components({
-        resolvers: [ElementPlusResolver()]
-      }),
-
-      // 生产环境启用Gzip压缩
-      isProd &&
-        viteCompression({
-          algorithm: 'gzip',
-          ext: '.gz',
-          threshold: 10240, // 10kb以上的文件进行压缩
-          deleteOriginFile: false
-        }),
-
-      // 构建分析可视化工具
-      isProd &&
-        visualizer({
-          open: true,
-          gzipSize: true,
-          brotliSize: true,
-          filename: 'dist/stats.html'
-        })
-    ].filter(Boolean),
-
-    // 路径别名配置
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, './src')
-      }
-    },
-
-    // 开发服务器配置
-    server: {
-      // API请求代理
-      proxy: {
-        '/api': {
-          target: 'http://127.0.0.1:8000',
-          changeOrigin: true
-        }
-      }
-    },
-
-    // 构建配置
-    build: {
-      outDir: 'dist',
-      // 仅在开发环境启用sourcemap
-      sourcemap: !isProd,
-      // 启用CSS代码分割
-      cssCodeSplit: true,
-      // 生产环境使用terser压缩
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: isProd,
-          drop_debugger: isProd
-        }
+export default defineConfig({
+  plugins: [
+    vue(),
+    UnoCSS(), // UnoCSS 必须在 Vue 插件之后 (或者根据 UnoCSS 文档推荐顺序)
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+      // 自动导入 Vue 相关函数，如：ref, reactive, toRef 等
+      imports: ['vue', 'vue-router', 'pinia'], 
+      eslintrc: {
+        enabled: true, // Default `false`
+        filepath: './.eslintrc-auto-import.json', // Default `./.eslintrc-auto-import.json`
+        globalsPropValue: true, // Default `true`, (true | false | 'readonly' | 'readable' | 'writable' | 'writeable')
       },
-      rollupOptions: {
-        output: {
-          // 代码分块策略
-          manualChunks: {
-            'vue-vendor': ['vue', 'vue-router', 'pinia'],
-            'element-plus': ['element-plus'],
-            utils: ['axios', '@vueuse/core']
-          },
-          // 使用内容哈希命名文件以优化缓存
-          entryFileNames: isProd ? 'assets/[name].[hash].js' : 'assets/[name].js',
-          chunkFileNames: isProd ? 'assets/[name].[hash].js' : 'assets/[name].js',
-          assetFileNames: isProd ? 'assets/[name].[hash].[ext]' : 'assets/[name].[ext]'
-        }
-      }
+      dts: 'src/types/auto-imports.d.ts', // 指定自动导入的类型定义文件路径
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
+      // 指定自定义组件位置，默认是 'src/components'
+      dirs: ['src/core/ui', 'src/features/**/components'],
+      dts: 'src/types/components.d.ts', // 指定组件类型定义文件路径
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    port: 3000, // 开发服务器端口
+    open: false, // 是否自动打开浏览器
+    proxy: {
+      // 可选：配置开发环境 API 代理
+      // '/api': {
+      //   target: 'http://localhost:8000', // 后端服务地址
+      //   changeOrigin: true,
+      //   // rewrite: (path) => path.replace(/^\/api/, '')
+      // }
+    },
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false, // 生产环境是否生成 source map
+    // chunkSizeWarningLimit: 1500, // 可选: 调整块大小警告限制 (KB)
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    include: ['src/**/__tests__/**/*.spec.ts'],
+    alias: {
+      '@': path.resolve(__dirname, './src'),
     }
-  }
-})
+  },
+}) 
