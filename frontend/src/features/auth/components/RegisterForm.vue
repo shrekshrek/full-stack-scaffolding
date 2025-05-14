@@ -2,8 +2,9 @@
   <el-form
     ref="registerFormRef"
     :model="registerForm"
-    :rules="registerRules"
-    label-position="top"
+    :rules="rules"
+    label-width="120px"
+    class="register-form"
     @submit.prevent="handleSubmit"
   >
     <el-form-item label="用户名" prop="fullName">
@@ -24,104 +25,98 @@
       />
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" native-type="submit" :loading="loading" class="w-full">
+      <el-button type="primary" native-type="submit" :loading="isLoading">
         注册
       </el-button>
     </el-form-item>
-    <div v-if="error" class="text-red-500 text-sm mt-2 text-center">
-      {{ error }}
-    </div>
+    <el-form-item v-if="errorMsg">
+      <p class="text-red-500">{{ errorMsg }}</p>
+    </el-form-item>
   </el-form>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import type { FormInstance, FormRules } from 'element-plus'
-import { useAuthStore } from '@/features/auth/store' // Will be used later
-import type { RegisterPayload } from '@/features/auth/types' // Ensure this type exists
-import { useRouter } from 'vue-router' // Import and use router for navigation
+import { ref, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElForm, ElFormItem, ElInput, ElButton, type FormInstance, type FormRules } from 'element-plus';
+import { useAuthStore } from '@/features/auth/store';
+import type { RegisterPayload } from '@/features/auth/types';
 
-const registerFormRef = ref<FormInstance>()
-const authStore = useAuthStore() // Will be used later
-const router = useRouter() // Import and use router for navigation
+const router = useRouter();
+const authStore = useAuthStore();
 
-const registerForm = reactive<RegisterPayload & { confirmPassword?: string }>({
+const registerFormRef = ref<FormInstance>();
+
+const registerForm = reactive<RegisterPayload & { confirmPassword: string }>({
   fullName: '',
   email: '',
   password: '',
   confirmPassword: '',
-})
+});
 
-const loading = ref(false) // Placeholder for authStore.isLoading
-const error = ref<string | null>(null) // Placeholder for authStore.error
+const isLoading = computed(() => authStore.isLoading);
+const errorMsg = computed(() => authStore.error);
 
 const validatePass = (rule: any, value: any, callback: any) => {
   if (value === '') {
-    callback(new Error('请输入密码'))
+    callback(new Error('请输入密码'));
   } else {
     if (registerForm.confirmPassword !== '') {
-      if (!registerFormRef.value) return
-      registerFormRef.value.validateField('confirmPassword', () => null)
+      if (!registerFormRef.value) return;
+      registerFormRef.value.validateField('confirmPassword', () => null);
     }
-    callback()
+    callback();
   }
-}
+};
+
 const validatePass2 = (rule: any, value: any, callback: any) => {
   if (value === '') {
-    callback(new Error('请再次输入密码'))
+    callback(new Error('请再次输入密码'));
   } else if (value !== registerForm.password) {
-    callback(new Error("两次输入的密码不一致!"))
+    callback(new Error("两次输入的密码不一致!"));
   } else {
-    callback()
+    callback();
   }
-}
+};
 
-const registerRules = reactive<FormRules>({
+const rules = reactive<FormRules>({
   fullName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
     { type: 'email', message: '请输入有效的邮箱地址', trigger: ['blur', 'change'] },
   ],
-  password: [
-    { required: true, validator: validatePass, trigger: 'blur' }
-  ],
-  confirmPassword: [
-    { required: true, validator: validatePass2, trigger: 'blur' }
-  ],
-})
+  password: [{ validator: validatePass, trigger: 'blur', required: true }],
+  confirmPassword: [{ validator: validatePass2, trigger: 'blur', required: true }],
+});
 
 const handleSubmit = async () => {
-  if (!registerFormRef.value) return
-  await registerFormRef.value.validate(async (valid) => {
+  if (!registerFormRef.value) return;
+  try {
+    const valid = await registerFormRef.value.validate();
     if (valid) {
-      loading.value = true
-      error.value = null
-      // Simulate registration call
-      // console.log('Simulating registration with:', {
-      //   fullName: registerForm.fullName,
-      //   email: registerForm.email,
-      //   password: registerForm.password,
-      // });
-      // await new Promise(resolve => setTimeout(resolve, 1500));
-      const success = await authStore.register({ // Will be used later
+      const payload: RegisterPayload = {
         fullName: registerForm.fullName,
         email: registerForm.email,
         password: registerForm.password,
-      });
-      // const success = Math.random() > 0.3; // Simulate success/failure
+      };
+      const success = await authStore.register(payload);
       if (success) {
-        console.log('Registration successful (simulated)');
-        router.push('/'); // Redirect on success
-      } else {
-        error.value = authStore.error || '注册失败，请稍后重试';
-        console.error('Registration failed (simulated)');
+        router.push('/');
       }
-      loading.value = false
     }
-  })
-}
+  } catch (error) {
+    // Validation failed, error is already handled by Element Plus form messages.
+    // console.error('Validation failed:', error);
+  }
+};
 </script>
 
 <style scoped>
-/* Add any component-specific styles here if needed */
+.register-form {
+  max-width: 500px;
+  margin: auto;
+}
+.text-red-500 {
+  color: #f56c6c;
+}
 </style> 
