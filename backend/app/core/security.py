@@ -6,10 +6,10 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import ValidationError
 
-from app.core.config import get_settings
+from app.core.config import settings
 from app.schemas.token import TokenPayload
 
-settings = get_settings()
+ALGORITHM = settings.ALGORITHM
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -17,8 +17,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # OAuth2 scheme for token authentication
 # tokenUrl should point to your token generation endpoint (e.g., /api/v1/auth/login)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
-
-ALGORITHM = settings.ALGORITHM
 
 def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     if expires_delta:

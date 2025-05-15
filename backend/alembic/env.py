@@ -35,11 +35,20 @@ log = logging.getLogger(__name__) # Or logging.getLogger("alembic.env")
 
 def get_app_metadata():
     """Dynamically imports and returns the app's Base.metadata."""
-    from app.models.base import Base as AppBaseMetadata # Import here to ensure models are loaded
-    # Implicitly, importing Base from app.models.base should trigger app.models.__init__.py,
-    # which in turn imports User, registering it to Base.metadata.
-    # print("DEBUG: In get_app_metadata(), tables in AppBaseMetadata.metadata:", AppBaseMetadata.metadata.tables.keys())
-    log.warning(f"DEBUG (get_app_metadata): Tables in metadata: {list(AppBaseMetadata.metadata.tables.keys())}") # <--- Use logger
+    # Explicitly import all model modules to ensure they register with Base
+    from app.models import user # Assuming user.py contains User model
+    # You would add other model module imports here, e.g.:
+    # from app.models import item
+    # from app.models import order
+    
+    from app.models.base import Base as AppBaseMetadata
+    
+    # # --- DIRECT PRINT FOR DEBUGGING --- (Commented out)
+    # print(f"DEBUG PRINT [get_app_metadata]: Tables in AppBaseMetadata.metadata: {list(AppBaseMetadata.metadata.tables.keys())}")
+    # print(f"DEBUG PRINT [get_app_metadata]: AppBaseMetadata object ID: {id(AppBaseMetadata.metadata)}")
+    # # --- END DIRECT PRINT ---
+
+    log.warning(f"DEBUG (get_app_metadata): Tables in metadata after explicit model imports: {list(AppBaseMetadata.metadata.tables.keys())}")
     log.warning(f"DEBUG (get_app_metadata): Metadata object ID: {id(AppBaseMetadata.metadata)}")
     return AppBaseMetadata.metadata
 
@@ -52,6 +61,23 @@ def get_db_url() -> str:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+# Moved do_run_migrations definition before its use in run_migrations_online
+def do_run_migrations(connection):
+    # ---> Get metadata dynamically
+    current_target_metadata = get_app_metadata()
+    log.warning(f"DEBUG (do_run_migrations): Using metadata object ID: {id(current_target_metadata)}") # <--- Use logger
+    context.configure(
+        connection=connection, 
+        target_metadata=current_target_metadata, # Use dynamically fetched metadata
+        render_as_batch=True,
+        template_args={}
+    )
+    # # --- DIRECT PRINT FOR DEBUGGING --- (Commented out)
+    # print(f"DEBUG PRINT [do_run_migrations]: Context configured. Target metadata tables: {list(current_target_metadata.tables.keys())}")
+    # # --- END DIRECT PRINT ---
+
+    with context.begin_transaction():
+        context.run_migrations()
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -77,6 +103,9 @@ def run_migrations_offline() -> None:
         render_as_batch=True,
         template_args={}
     )
+    # # --- DIRECT PRINT FOR DEBUGGING --- (Commented out)
+    # print(f"DEBUG PRINT [run_migrations_offline]: Context configured. Target metadata tables: {list(current_target_metadata.tables.keys())}")
+    # # --- END DIRECT PRINT ---
 
     with context.begin_transaction():
         context.run_migrations()
@@ -116,16 +145,3 @@ else:
     # ---> USING asyncio.run FOR ONLINE MODE
     import asyncio
     asyncio.run(run_migrations_online())
-
-def do_run_migrations(connection):
-    # ---> Get metadata dynamically
-    current_target_metadata = get_app_metadata()
-    log.warning(f"DEBUG (do_run_migrations): Using metadata object ID: {id(current_target_metadata)}") # <--- Use logger
-    context.configure(
-        connection=connection, 
-        target_metadata=current_target_metadata, # Use dynamically fetched metadata
-        render_as_batch=True,
-        template_args={}
-    )
-    with context.begin_transaction():
-        context.run_migrations()

@@ -69,15 +69,6 @@ web_modules/
 # Yarn Integrity file
 .yarnclean
 
-# dotenv environment variables file
-.env
-.env.*
-!.env.example
-!.env.production
-!.env.development
-# However, often .env.production and .env.development might be versioned if they contain non-sensitive defaults
-# Or if the actual secrets are injected during CI/CD. For now, let's assume they might contain secrets.
-
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache

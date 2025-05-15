@@ -46,12 +46,20 @@ build-backend = "pdm.pep517.api"
 python_version = "3.11" # Ensure this matches project.requires-python
 
 [tool.pdm.scripts]
-start_dev = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+dev = "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 run_tests = "pytest"
 run_lint = "ruff check . && black --check . && mypy ."
 apply_lint = "ruff check . --fix && black ."
 db_migrate = "alembic upgrade head"
-db_revision = "alembic revision"
+db_revision = {cmd = "alembic -x logging.level=DEBUG revision --autogenerate -m 'new_revision'", help = "Generate a new database revision with autogenerate"}
+db_upgrade = {cmd = "alembic upgrade head", help = "Upgrade database to the latest revision"}
+db_downgrade = {cmd = "alembic downgrade -1", help = "Downgrade database by one revision"}
+db_current = {cmd = "alembic current", help = "Show current database revision"}
+db_history = {cmd = "alembic history", help = "Show database revision history"}
+db_edit_current = {cmd = "alembic edit current", help = "Edit current revision script"}
+
+[[tool.pdm.autoexport]]
+filename = "requirements.txt"
 
 [tool.black]
 line-length = 88
