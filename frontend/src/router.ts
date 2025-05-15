@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory, RouteRecordRaw, RouterScrollBehavior } from 'vue-router'
+import { useAuthStore } from '@/features/auth/store' // Import auth store for navigation guards
 
 // Import feature routes here if they are in separate files
-// Example: import authRoutes from '@/features/auth/routes'
+import authRoutes from '@/features/auth/routes' // Import auth routes
+import dashboardRoutes from '@/features/dashboard/routes' // Import dashboard routes
 // Example: import userRoutes from '@/features/user-profile/routes'
 
 const routes: Array<RouteRecordRaw> = [
@@ -10,22 +12,15 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
-    // component: () => import('@/features/home/views/HomeView.vue'), // Lazy load home view
-    // For now, a placeholder component until HomeView is created:
-    component: { template: '<div>Welcome Home! (Placeholder)</div>' }, 
-    meta: { 
+    component: () => import('@/features/home/views/HomeView.vue'), // Lazy load home view
+    meta: {
       // layout: 'DefaultLayout', // Example: specify layout for this route
-      // requiresAuth: false 
-    }
+      requiresAuth: false,
+    },
   },
   // Example route for a feature (auth)
-  // {
-  //   path: '/login',
-  //   name: 'Login',
-  //   component: () => import('@/features/auth/views/LoginView.vue'),
-  //   meta: { layout: 'AuthLayout', guest: true } // Example: guest only, auth layout
-  // },
-  // ...authRoutes, // If authRoutes is an array of RouteRecordRaw
+  ...authRoutes, // Spread auth routes here
+  ...dashboardRoutes, // Spread dashboard routes here
   // ...userRoutes,
 
   // Catch-all 404 route (optional, but good practice)
@@ -33,8 +28,8 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:catchAll(.*)*',
     name: 'NotFound',
     component: () => import('@/core/ui/NotFoundPage.vue'), // Placeholder for a 404 component
-    meta: { layout: 'BlankLayout' } // Example for a blank layout
-  }
+    meta: { layout: 'BlankLayout' }, // Example for a blank layout
+  },
 ]
 
 const router = createRouter({
@@ -50,16 +45,34 @@ const router = createRouter({
 })
 
 // Optional: Global navigation guards
-// router.beforeEach((to, from, next) => {
-//   // const isAuthenticated = !!localStorage.getItem('token'); // Example auth check
-//   // if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
-//   //   next({ name: 'Login' });
-//   // } else if (to.matched.some(record => record.meta.guest) && isAuthenticated) {
-//   //   next({ name: 'Home' });
-//   // } else {
-//   //   next();
-//   // }
-//   next(); // Proceed by default if no specific logic
-// });
+router.beforeEach(async (to, from, next) => {
+  // Initialize the auth store here if it's not already initialized
+  // This is to ensure that the Pinia store is active before being used in the guard.
+  // Direct usage of useAuthStore() outside setup or lifecycle hooks might behave unexpectedly
+  // if Pinia isn't fully set up by the time the router is initialized.
+  // However, in most setups with main.ts properly creating and using Pinia, this should be fine.
+  const authStore = useAuthStore()
 
-export default router 
+  // Fetch current user if not already loaded and has a token.
+  // This helps in cases where the user refreshes a page that requires auth.
+  if (authStore.accessToken && !authStore.currentUser && !authStore.isLoading) {
+    // Only fetch if not already loading to prevent multiple fetches on rapid navigation
+    await authStore.fetchCurrentUser()
+  }
+
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const guestOnly = to.matched.some((record) => record.meta.guest)
+
+  if (requiresAuth && !authStore.isLoggedIn) {
+    // If route requires auth and user is not logged in, redirect to login
+    next({ name: 'Login', query: { redirect: to.fullPath } })
+  } else if (guestOnly && authStore.isLoggedIn) {
+    // If route is for guests only (like login/register) and user is logged in, redirect to home
+    next({ name: 'Home' })
+  } else {
+    // Otherwise, proceed
+    next()
+  }
+})
+
+export default router

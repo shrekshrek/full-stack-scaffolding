@@ -14,8 +14,9 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.6.0",
-    "element-plus": "^2.7.0",
+    "element-plus": "^2.6.3",
     "pinia": "^2.1.0",
     "vue": "^3.4.0",
     "vue-router": "^4.3.0"
@@ -31,7 +32,7 @@
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/test-utils": "^2.4.0",
     "@vue/tsconfig": "^0.5.0",
-    "autoprefixer": "^10.4.0", 
+    "autoprefixer": "^10.4.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
     "jsdom": "^24.0.0",
@@ -46,4 +47,4 @@
     "vitest": "^1.6.0",
     "vue-tsc": "^2.0.0"
   }
-} 
+}

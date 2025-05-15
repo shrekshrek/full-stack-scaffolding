@@ -3,6 +3,9 @@ import App from './App.vue'
 import router from './router' // Vue Router
 import { createPinia } from 'pinia' // Pinia
 
+// Import UnoCSS entry (virtual module)
+import 'virtual:uno.css';
+
 // Import Element Plus (如果需要全局注册组件或样式，但通常按需引入插件会处理)
 // import ElementPlus from 'element-plus'
 // import 'element-plus/dist/index.css' // Element Plus 完整样式

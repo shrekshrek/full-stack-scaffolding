@@ -6,7 +6,7 @@ export interface LoginCredentials {
 }
 
 export interface RegisterPayload extends LoginCredentials {
-  fullName?: string;
+  username: string;
   // add other registration fields if needed
 }
 
@@ -21,7 +21,15 @@ export interface AuthResponse {
 export interface User {
   id: string | number;
   email: string;
-  fullName?: string;
+  username: string;
   // roles?: string[];
   // permissions?: string[];
+} 
+
+export interface AuthState {
+  currentUser: User | null;
+  accessToken: string | null;
+  error: string | null; // Or a more specific error type, e.g., { message: string }
+  isLoading: boolean;
+  // Add other state properties like refreshToken if managed here
 } 

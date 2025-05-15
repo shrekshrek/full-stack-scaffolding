@@ -15,12 +15,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    },
-    "types": [
-      "vite/client",
-      "vitest/globals", // If using Vitest globals
-      "node" // Important for path module in vite.config.ts if not automatically picked up
-    ]
+    }
   },
   "include": [
     "src/**/*.ts",

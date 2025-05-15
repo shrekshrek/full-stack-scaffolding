@@ -1,31 +1,31 @@
 <template>
-  <div class="not-found-page flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center p-8">
-    <h1 class="text-6xl font-bold text-blue-500 mb-4">404</h1>
-    <h2 class="text-3xl font-semibold mb-6">Oops! Page Not Found</h2>
-    <p class="text-gray-600 mb-8 max-w-md">
-      The page you are looking for might have been removed, had its name changed,
-      or is temporarily unavailable.
+  <div class="not-found-page flex flex-col items-center justify-center min-h-[calc(100vh-110px)] text-center p-6">
+    <el-icon :size="80" class="text-gray-400 mb-6"><WarningFilled /></el-icon>
+    <h1 class="text-6xl font-bold text-gray-700 mb-4">404</h1>
+    <p class="text-2xl text-gray-500 mb-8">哎呀！页面未找到。</p>
+    <p class="text-gray-500 mb-8">
+      您要查找的页面不存在或已被移动。
     </p>
-    <router-link 
-      to="/" 
-      class="px-6 py-3 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors duration-300"
-    >
-      Go to Homepage
-    </router-link>
+    <el-button type="primary" size="large" @click="goHome">
+      返回首页
+    </el-button>
   </div>
 </template>
 
 <script setup lang="ts">
-// No specific script needed for this simple static page
-// console.log('NotFoundPage rendered');
+import { useRouter } from 'vue-router';
+import { WarningFilled } from '@element-plus/icons-vue'; // Import icon
+
+const router = useRouter();
+
+const goHome = () => {
+  router.push('/');
+};
 </script>
 
-<style scoped lang="scss">
-/* 
-  Styling is primarily done with UnoCSS utility classes in the template.
-  You can add specific scoped styles here if needed.
-*/
+<style scoped>
+/* min-h is calculated based on app header (60px) and footer (50px) heights */
 .not-found-page {
-  // You could add a background image or other specific styles here if utilities are not enough.
+  /* Add any specific styles if needed */
 }
 </style> 

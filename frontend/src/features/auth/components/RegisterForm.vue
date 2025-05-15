@@ -7,8 +7,8 @@
     class="register-form"
     @submit.prevent="handleSubmit"
   >
-    <el-form-item label="用户名" prop="fullName">
-      <el-input v-model="registerForm.fullName" placeholder="请输入您的用户名" />
+    <el-form-item label="用户名" prop="username">
+      <el-input v-model="registerForm.username" placeholder="请输入您的用户名" />
     </el-form-item>
     <el-form-item label="邮箱" prop="email">
       <el-input v-model="registerForm.email" type="email" placeholder="请输入邮箱地址" />
@@ -47,8 +47,8 @@ const authStore = useAuthStore();
 
 const registerFormRef = ref<FormInstance>();
 
-const registerForm = reactive<RegisterPayload & { confirmPassword: string }>({
-  fullName: '',
+const registerForm = reactive<Omit<RegisterPayload, 'email' | 'password'> & { username: string; email: string; password: string; confirmPassword: string }>({
+  username: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -80,7 +80,7 @@ const validatePass2 = (rule: any, value: any, callback: any) => {
 };
 
 const rules = reactive<FormRules>({
-  fullName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
     { type: 'email', message: '请输入有效的邮箱地址', trigger: ['blur', 'change'] },
@@ -95,7 +95,7 @@ const handleSubmit = async () => {
     const valid = await registerFormRef.value.validate();
     if (valid) {
       const payload: RegisterPayload = {
-        fullName: registerForm.fullName,
+        username: registerForm.username,
         email: registerForm.email,
         password: registerForm.password,
       };

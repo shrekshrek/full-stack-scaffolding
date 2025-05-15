@@ -15,7 +15,7 @@ import UnoCSS from 'unocss/vite'
 export default defineConfig({
   plugins: [
     vue(),
-    UnoCSS(), // UnoCSS 必须在 Vue 插件之后 (或者根据 UnoCSS 文档推荐顺序)
+    UnoCSS(),
     AutoImport({
       resolvers: [ElementPlusResolver()],
       // 自动导入 Vue 相关函数，如：ref, reactive, toRef 等
@@ -59,10 +59,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    // setupFiles: './src/vitest.setup.ts',
-    include: ['src/**/__tests__/**/*.spec.ts'],
+    setupFiles: './src/vitest.setup.ts',
+    include: ['src/**/*.{spec,test}.{js,jsx,ts,tsx}'],
     alias: {
       '@': path.resolve(__dirname, './src'),
-    }
+      // 新增别名，将 CSS 和常见资源文件指向一个空模块
+      '^.*\\.(css|less|scss|sass)$ ': path.resolve(__dirname, './src/test-utils/empty-module-mock.js'),
+      '^.*\\.(jpg|jpeg|png|gif|webp|svg|eot|otf|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$ ': path.resolve(__dirname, './src/test-utils/empty-module-mock.js'),
+    },
   },
 }) 

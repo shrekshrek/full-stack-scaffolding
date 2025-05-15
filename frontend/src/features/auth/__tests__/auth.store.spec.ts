@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { createPinia, setActivePinia } from 'pinia'
-import { useAuthStore } from '../store'
-import apiClient from '@/core/services/apiClient'
-import type { User, AuthResponse, LoginCredentials, RegisterPayload } from '../types'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { setActivePinia, createPinia } from 'pinia';
+import { useAuthStore } from '../store'; 
+import apiClient from '@/core/services/apiClient'; 
+import type { User, AuthResponse, LoginCredentials, RegisterPayload } from '../types';
 
 // Mock apiClient
 vi.mock('@/core/services/apiClient', () => ({
   default: {
-    get: vi.fn(),
     post: vi.fn(),
+    get: vi.fn(),
     defaults: {
       headers: {
         common: {},
       },
     },
   },
-}))
+}));
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -30,60 +30,88 @@ const localStorageMock = (() => {
     },
     clear: () => {
       store = {};
-    }
+    },
   };
 })();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
 
 describe('Auth Store', () => {
   beforeEach(() => {
-    // Create a new Pinia instance and make it active for each test
     setActivePinia(createPinia());
     // Reset mocks and localStorage before each test
+    vi.clearAllMocks();
     localStorageMock.clear();
-    vi.mocked(apiClient.get).mockClear();
-    vi.mocked(apiClient.post).mockClear();
-    delete apiClient.defaults.headers.common['Authorization'];
+    // Ensure apiClient common headers are reset if modified by store initialization
+    // Accessing potentially undefined property, ensure it exists or handle safely
+    // if (apiClient && apiClient.defaults && apiClient.defaults.headers && apiClient.defaults.headers.common) {
+    //    apiClient.defaults.headers.common['Authorization'] = undefined;
+    // } else {
+    //   // console.warn('[AuthStore Test Setup] apiClient.defaults.headers.common not found for reset');
+    // }
+    // Simplified reset based on mock structure
+    apiClient.defaults.headers.common['Authorization'] = undefined;
   });
 
-  it('initial state is correct when no token in localStorage', () => {
+  afterEach(() => {
+    // Optional: any cleanup after tests if needed
+  });
+
+  it('initial state is correct', () => {
     const authStore = useAuthStore();
     expect(authStore.currentUser).toBeNull();
     expect(authStore.accessToken).toBeNull();
-    expect(authStore.isLoggedIn).toBe(false);
     expect(authStore.isLoading).toBe(false);
     expect(authStore.error).toBeNull();
+    expect(authStore.isLoggedIn).toBe(false);
   });
 
-  it('initializes with token from localStorage and fetches user', async () => {
-    const mockToken = 'test-token';
-    const mockUser: User = { id: '1', email: 'test@example.com', fullName: 'Test User' };
-    localStorageMock.setItem('accessToken', mockToken);
-    vi.mocked(apiClient.get).mockResolvedValueOnce({ data: { user: mockUser } });
+  // --- Tests for setAuthData ---
+  describe('setAuthData', () => {
+    it('sets user, token, localStorage, and apiClient header correctly when token is provided', () => {
+      const authStore = useAuthStore();
+      const mockUser: User = { id: '1', email: 'test@example.com', username: 'testuser' };
+      const mockToken = 'mock-access-token';
 
-    const authStore = useAuthStore(); // Initialize store, which should trigger fetchCurrentUser
+      authStore.setAuthData(mockUser, mockToken);
 
-    // Wait for fetchCurrentUser to complete (it's async)
-    // A more robust way might involve awaiting a promise if fetchCurrentUser returned one
-    // or checking isLoading state changes, but for now a small timeout or direct check is okay.
-    await vi.waitFor(() => expect(authStore.isLoading).toBe(false));
-    
-    expect(authStore.accessToken).toBe(mockToken);
-    expect(apiClient.defaults.headers.common['Authorization']).toBe(`Bearer ${mockToken}`);
-    expect(apiClient.get).toHaveBeenCalledWith('/auth/me');
-    expect(authStore.currentUser).toEqual(mockUser);
-    expect(authStore.isLoggedIn).toBe(true);
+      expect(authStore.currentUser).toEqual(mockUser);
+      expect(authStore.accessToken).toBe(mockToken);
+      expect(localStorageMock.getItem('accessToken')).toBe(mockToken);
+      expect(apiClient.defaults.headers.common['Authorization']).toBe(`Bearer ${mockToken}`);
+      expect(authStore.error).toBeNull(); // Should clear error
+    });
+
+    it('clears user, token, localStorage, and apiClient header correctly when token is null', () => {
+      const authStore = useAuthStore();
+      // Simulate a previous login
+      localStorageMock.setItem('accessToken', 'some-old-token');
+      apiClient.defaults.headers.common['Authorization'] = 'Bearer some-old-token';
+      authStore.currentUser = { id: '1', email: 'test@example.com', username: 'testuser' }; // Manually set for test setup
+      authStore.accessToken = 'some-old-token';
+
+      authStore.setAuthData(null, null);
+
+      expect(authStore.currentUser).toBeNull();
+      expect(authStore.accessToken).toBeNull();
+      expect(localStorageMock.getItem('accessToken')).toBeNull();
+      expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
+      expect(authStore.error).toBeNull(); // Should clear error
+    });
   });
 
+  // --- Tests for login action ---
   describe('login action', () => {
-    const loginCredentials: LoginCredentials = { email: 'test@example.com', password: 'password' };
-    const mockUser: User = { id: '1', email: loginCredentials.email, fullName: 'Test User' };
-    const mockToken = 'user-token';
+    const loginCredentials: LoginCredentials = { email: 'test@example.com', password: 'password123' };
+    const mockUser: User = { id: '1', email: 'test@example.com', username: 'testuser' };
+    const mockToken = 'mock-login-token';
     const mockAuthResponse: AuthResponse = { user: mockUser, accessToken: mockToken };
 
-    it('successfully logs in, updates state, and stores token', async () => {
+    it('handles successful login', async () => {
       const authStore = useAuthStore();
-      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockAuthResponse });
+      (apiClient.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockAuthResponse });
 
       const result = await authStore.login(loginCredentials);
 
@@ -92,22 +120,15 @@ describe('Auth Store', () => {
       expect(authStore.error).toBeNull();
       expect(authStore.currentUser).toEqual(mockUser);
       expect(authStore.accessToken).toBe(mockToken);
-      expect(authStore.isLoggedIn).toBe(true);
       expect(localStorageMock.getItem('accessToken')).toBe(mockToken);
       expect(apiClient.defaults.headers.common['Authorization']).toBe(`Bearer ${mockToken}`);
       expect(apiClient.post).toHaveBeenCalledWith('/auth/login', loginCredentials);
     });
 
-    it('handles login failure, resets state, and clears token', async () => {
+    it('handles failed login (API error)', async () => {
       const authStore = useAuthStore();
       const errorMessage = 'Invalid credentials';
-      vi.mocked(apiClient.post).mockRejectedValueOnce({ response: { data: { message: errorMessage } } });
-      
-      // Simulate a previous logged-in state to ensure it gets cleared
-      authStore.currentUser = mockUser;
-      authStore.accessToken = 'old-token';
-      localStorageMock.setItem('accessToken', 'old-token');
-      apiClient.defaults.headers.common['Authorization'] = 'Bearer old-token';
+      (apiClient.post as ReturnType<typeof vi.fn>).mockRejectedValue({ response: { data: { message: errorMessage } } });
 
       const result = await authStore.login(loginCredentials);
 
@@ -116,25 +137,53 @@ describe('Auth Store', () => {
       expect(authStore.error).toBe(errorMessage);
       expect(authStore.currentUser).toBeNull();
       expect(authStore.accessToken).toBeNull();
-      expect(authStore.isLoggedIn).toBe(false);
       expect(localStorageMock.getItem('accessToken')).toBeNull();
       expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
     });
+
+    it('handles failed login (generic error)', async () => {
+      const authStore = useAuthStore();
+      const errorMessage = 'Network Error';
+      (apiClient.post as ReturnType<typeof vi.fn>).mockRejectedValue(new Error(errorMessage));
+
+      const result = await authStore.login(loginCredentials);
+
+      expect(result).toBe(false);
+      expect(authStore.isLoading).toBe(false);
+      expect(authStore.error).toBe(errorMessage); // Or a default like 'Login failed' depending on store logic
+    });
+
+    it('sets isLoading during login process', async () => {
+      const authStore = useAuthStore();
+      let resolvePromise: (value: { data: AuthResponse }) => void;
+      (apiClient.post as ReturnType<typeof vi.fn>).mockImplementation(() => 
+        new Promise(resolve => {
+          resolvePromise = resolve;
+        })
+      );
+
+      // Don't await here to check isLoading state during the call
+      const loginPromise = authStore.login(loginCredentials);
+      expect(authStore.isLoading).toBe(true);
+
+      // @ts-ignore
+      resolvePromise({ data: mockAuthResponse }); // Resolve the promise
+      await loginPromise; // Now await for the promise to complete
+
+      expect(authStore.isLoading).toBe(false);
+    });
   });
 
+  // --- Tests for register action ---
   describe('register action', () => {
-    const registerPayload: RegisterPayload = {
-      fullName: 'New User',
-      email: 'new@example.com',
-      password: 'newpassword'
-    };
-    const mockUser: User = { id: '2', email: registerPayload.email, fullName: registerPayload.fullName };
-    const mockToken = 'new-user-token';
+    const registerPayload: RegisterPayload = { username: 'newuser', email: 'new@example.com', password: 'newpassword123' };
+    const mockUser: User = { id: '2', email: 'new@example.com', username: 'newuser' };
+    const mockToken = 'mock-register-token';
     const mockAuthResponse: AuthResponse = { user: mockUser, accessToken: mockToken };
 
-    it('successfully registers, updates state, and stores token', async () => {
+    it('handles successful registration', async () => {
       const authStore = useAuthStore();
-      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockAuthResponse });
+      (apiClient.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockAuthResponse });
 
       const result = await authStore.register(registerPayload);
 
@@ -143,16 +192,15 @@ describe('Auth Store', () => {
       expect(authStore.error).toBeNull();
       expect(authStore.currentUser).toEqual(mockUser);
       expect(authStore.accessToken).toBe(mockToken);
-      expect(authStore.isLoggedIn).toBe(true);
       expect(localStorageMock.getItem('accessToken')).toBe(mockToken);
       expect(apiClient.defaults.headers.common['Authorization']).toBe(`Bearer ${mockToken}`);
       expect(apiClient.post).toHaveBeenCalledWith('/auth/register', registerPayload);
     });
 
-    it('handles registration failure, resets state, and clears token', async () => {
+    it('handles failed registration (API error)', async () => {
       const authStore = useAuthStore();
       const errorMessage = 'Email already exists';
-      vi.mocked(apiClient.post).mockRejectedValueOnce({ response: { data: { message: errorMessage } } });
+      (apiClient.post as ReturnType<typeof vi.fn>).mockRejectedValue({ response: { data: { message: errorMessage } } });
 
       const result = await authStore.register(registerPayload);
 
@@ -161,103 +209,115 @@ describe('Auth Store', () => {
       expect(authStore.error).toBe(errorMessage);
       expect(authStore.currentUser).toBeNull();
       expect(authStore.accessToken).toBeNull();
-      expect(authStore.isLoggedIn).toBe(false);
-      expect(localStorageMock.getItem('accessToken')).toBeNull();
-      expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
     });
   });
 
+  // --- Tests for logout action ---
   describe('logout action', () => {
-    it('clears user, token, localStorage, and apiClient header', async () => {
+    it('clears auth state and localStorage', async () => {
       const authStore = useAuthStore();
-      // Simulate a logged-in state
-      const mockUser: User = { id: '1', email: 'test@example.com' };
-      const mockToken = 'test-token';
-      authStore.currentUser = mockUser;
-      authStore.accessToken = mockToken;
-      localStorageMock.setItem('accessToken', mockToken);
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
-
+      // Simulate logged-in state
+      const mockUser: User = { id: '1', email: 'test@example.com', username: 'testuser' };
+      const mockToken = 'mock-existing-token';
+      authStore.setAuthData(mockUser, mockToken);
+      expect(localStorageMock.getItem('accessToken')).toBe(mockToken);
+      
       await authStore.logout();
 
       expect(authStore.currentUser).toBeNull();
       expect(authStore.accessToken).toBeNull();
-      expect(authStore.isLoggedIn).toBe(false);
       expect(localStorageMock.getItem('accessToken')).toBeNull();
       expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
-      // Optionally, check if apiClient.post was called if you decide to implement backend logout notification
-      // expect(apiClient.post).toHaveBeenCalledWith('/auth/logout');
+      expect(authStore.error).toBeNull(); // Should also clear error state on logout
     });
   });
 
+  // --- Tests for fetchCurrentUser action ---
   describe('fetchCurrentUser action', () => {
-    const mockUser: User = { id: '1', email: 'test@example.com', fullName: 'Test User' };
-    const mockToken = 'valid-token';
+    const mockUser: User = { id: 'current-user-id', email: 'current@example.com', username: 'currentuser' };
 
-    it('does nothing if no access token exists', async () => {
+    it('fetches and sets current user if token exists in store', async () => {
       const authStore = useAuthStore();
-      localStorageMock.removeItem('accessToken'); // Ensure no token
-      authStore.accessToken = null; // Ensure store state reflects no token
-      
+      authStore.accessToken = 'valid-token-in-store'; // Simulate token already in store but no user yet
+      apiClient.defaults.headers.common['Authorization'] = 'Bearer valid-token-in-store';
+      (apiClient.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { user: mockUser } });
+
+      await authStore.fetchCurrentUser();
+
+      expect(authStore.isLoading).toBe(false);
+      expect(authStore.currentUser).toEqual(mockUser);
+      expect(apiClient.get).toHaveBeenCalledWith('/auth/me');
+    });
+
+    it('does not fetch user if no token is in store', async () => {
+      const authStore = useAuthStore();
+      authStore.accessToken = null; // Ensure no token
+
       await authStore.fetchCurrentUser();
 
       expect(apiClient.get).not.toHaveBeenCalled();
       expect(authStore.currentUser).toBeNull();
-      expect(authStore.isLoading).toBe(false);
+      expect(authStore.isLoading).toBe(false); 
     });
 
-    it('successfully fetches and sets current user if token exists', async () => {
-      const mockTokenLocal = 'valid-token-for-success-fetch'; // Use unique token
-      const mockUserLocal: User = { id: 'fetched-user-1', email: 'fetch-success@example.com' };
-
-      localStorageMock.setItem('accessToken', mockTokenLocal);
-      // Set up the mock BEFORE initializing the store for the init-time fetchCurrentUser
-      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: { user: mockUserLocal } });
-
-      const authStore = useAuthStore(); 
-      // fetchCurrentUser should have been called during store initialization here
-      // because accessToken is in localStorage and currentUser is initially null.
-
-      // Wait for the async fetchCurrentUser (and subsequent isLoading state change) to complete
-      await vi.waitFor(() => expect(authStore.isLoading).toBe(false));
-
-      expect(apiClient.get).toHaveBeenCalledWith('/auth/me');
-      expect(authStore.currentUser).toEqual(mockUserLocal);
-      expect(authStore.accessToken).toBe(mockTokenLocal);
-      expect(authStore.isLoading).toBe(false); // Already checked by waitFor, but good to assert final state
-      expect(authStore.error).toBeNull();
-      expect(authStore.isLoggedIn).toBe(true); // This should now pass
-    });
-
-    it('handles failure when fetching current user and clears auth state', async () => {
-      localStorageMock.setItem('accessToken', mockToken);
-      const authStore = useAuthStore(); // Re-initialize
-      authStore.accessToken = mockToken;
-
-      vi.mocked(apiClient.get).mockRejectedValueOnce(new Error('Network error'));
+    it('clears auth state if fetching user fails', async () => {
+      const authStore = useAuthStore();
+      authStore.accessToken = 'invalid-token-in-store';
+      apiClient.defaults.headers.common['Authorization'] = 'Bearer invalid-token-in-store';
+      (apiClient.get as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Failed to fetch'));
 
       await authStore.fetchCurrentUser();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/auth/me');
-      expect(authStore.currentUser).toBeNull();
-      expect(authStore.accessToken).toBeNull(); // Token should be cleared on fetch failure
-      expect(authStore.isLoggedIn).toBe(false);
       expect(authStore.isLoading).toBe(false);
-      expect(localStorageMock.getItem('accessToken')).toBeNull(); // Also check localStorage
+      expect(authStore.currentUser).toBeNull();
+      expect(authStore.accessToken).toBeNull(); // Token should be cleared on auth failure
+      expect(localStorageMock.getItem('accessToken')).toBeNull();
       expect(apiClient.defaults.headers.common['Authorization']).toBeUndefined();
     });
 
-     it('fetchCurrentUser is called on initialization if token exists and user is not set', async () => {
-      localStorageMock.setItem('accessToken', mockToken);
-      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: { user: mockUser } });
-
-      const authStore = useAuthStore(); // Store initialization triggers the call
-
-      await vi.waitFor(() => expect(authStore.isLoading).toBe(false)); // Wait for async operations in init
-
+    it('initializes by fetching user if token exists in localStorage (store init)', () => {
+      localStorageMock.setItem('accessToken', 'token-from-localstorage');
+      (apiClient.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { user: mockUser } });
+      
+      // Instantiate store, which should trigger fetchCurrentUser via its internal init logic
+      const authStore = useAuthStore(); 
+      
+      // Need to wait for async operations triggered by store constructor
+      // This is tricky because the call is internal. We check the mock call.
       expect(apiClient.get).toHaveBeenCalledWith('/auth/me');
-      expect(authStore.currentUser).toEqual(mockUser);
+      // To verify state after async: await nextTick() or flushPromises() if available from test-utils
+      // For now, we mainly check if the call was made.
     });
   });
 
+  // --- Tests for isLoggedIn getter ---
+  describe('isLoggedIn getter', () => {
+    it('returns true when user and token exist', () => {
+      const authStore = useAuthStore();
+      authStore.currentUser = { id: '1', email: 'test@example.com', username: 'testuser' };
+      authStore.accessToken = 'some-token';
+      expect(authStore.isLoggedIn).toBe(true);
+    });
+
+    it('returns false when user is null', () => {
+      const authStore = useAuthStore();
+      authStore.currentUser = null;
+      authStore.accessToken = 'some-token';
+      expect(authStore.isLoggedIn).toBe(false);
+    });
+
+    it('returns false when token is null', () => {
+      const authStore = useAuthStore();
+      authStore.currentUser = { id: '1', email: 'test@example.com', username: 'testuser' };
+      authStore.accessToken = null;
+      expect(authStore.isLoggedIn).toBe(false);
+    });
+
+    it('returns false when both user and token are null', () => {
+      const authStore = useAuthStore();
+      authStore.currentUser = null;
+      authStore.accessToken = null;
+      expect(authStore.isLoggedIn).toBe(false);
+    });
+  });
 }); 

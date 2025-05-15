@@ -172,19 +172,31 @@ alwaysApply: false
 - **测试文件位置**:
     - 通常与被测试文件同级或在 `__tests__` 子目录内。
     - 例如: `[frontend/src/features/auth/components/__tests__/LoginForm.spec.ts](mdc:frontend/src/features/auth/components/__tests__/LoginForm.spec.ts)`
-- **测试类型**:
+- **测试类型与策略**:
     - **单元测试**:
-        - 针对 `composables` (全局及功能模块内)。
-        - 针对 `utils` (全局及功能模块内)。
-        - 针对 Pinia stores 的 state、getters、actions。
-    - **组件测试**:
-        - 使用 `@vue/test-utils` 配合 Vitest。
-        - 测试自定义组件 (`core/ui/` 及 `features/*/components/`) 的渲染、交互、props 传递、事件触发。
-        - 测试集成了 Element Plus 组件的页面或复杂组件时，主要关注业务逻辑的正确性。
-- **覆盖率**: 设定合理的测试覆盖率目标，并使用 Vitest 的覆盖率报告工具。
+        - **核心逻辑优先**: 单元测试应优先覆盖项目的核心业务逻辑，包括：
+            - Pinia stores 的 state、getters、actions (尤其是不直接依赖 DOM 的部分)。
+            - Composables (组合式函数，尤其是不直接操作 DOM 或依赖组件特定生命周期钩子进行 DOM 操作的部分)。
+            - 通用工具函数 (`utils`) 和纯逻辑服务。
+        - **组件单元测试 (`@vue/test-utils` in JSDOM)**:
+            - 主要测试组件自身的逻辑，如 props 的接收与处理、内部状态（data/refs）的变更、事件的正确触发、条件渲染逻辑（v-if/v-for）等。
+            - **信任第三方 UI 库**: 对于像 Element Plus 这样的外部 UI 库，单元测试应信任其组件的内部功能和行为。例如，不针对 Element Plus 表单 `validate()` 方法的详细验证机制或其错误信息的具体 DOM 展示方式编写细致的单元测试。假定这些库的组件在真实浏览器环境中能按其文档所述正常工作。
+            - **Mocking 第三方行为**: 如果组件逻辑依赖于第三方库组件的某个方法（如 Element Plus 表单的 `validate()`），可以在测试中 mock 该方法的行为（例如，模拟它返回成功或失败的 Promise），然后断言自己组件的后续逻辑是否按预期执行。
+            - **避免过度关注 JSDOM 限制**: 鉴于 JSDOM 并非完整浏览器环境，避免在单元测试中花费过多精力调试由环境差异引起的第三方 UI 库行为不一致问题。
+    - **集成测试** (可选，根据项目复杂度和需求决定):
+        - 测试多个组件或模块协同工作的场景。例如，测试一个包含多个子组件的视图，或测试组件与 Pinia store、Vue Router 的交互。
+        - 可以在 Vitest 环境下进行，但仍需注意 JSDOM 对复杂 UI 交互的限制。
+    - **端到端 (E2E) 测试**:
+        - **强烈推荐**用于验证关键用户流程和涉及复杂 UI 交互的场景，尤其是在 JSDOM 中难以准确测试的部分（如 Element Plus 表单的完整验证流程、拖拽、富文本编辑器等）。
+        - 使用 Cypress, Playwright 等工具，在真实浏览器环境中进行测试，以确保最高保真度。
+- **JSDOM 环境的使用**:
+    - 对于不涉及组件挂载和 DOM 操作的核心逻辑单元测试（例如纯 stores、纯 composables、工具函数），测试执行不依赖于 JSDOM 环境。如果全局测试环境配置为 JSDOM，这些测试也会在该环境下运行，通常没有负面影响但有轻微开销。
+    - 对于 Vue 组件的单元测试（使用 `@vue/test-utils` 进行挂载和交互），则**必须**使用 DOM 环境。通常在 `vite.config.ts` 中将 `test.environment` 配置为 `'jsdom'` 或 `'happy-dom'`。在编写这类测试时，应明确 JSDOM 的局限性（它并非完整浏览器），并遵循信任第三方库、聚焦组件自身逻辑的策略（例如，通过模拟第三方库方法来控制行为分支）。
+    - 如果希望更细致地控制测试环境，可以将全局 `test.environment` 设置为 `'node'`，并在每个需要 DOM 的组件测试文件顶部使用 `// @vitest-environment jsdom` 指令。
+- **覆盖率**: 设定合理的测试覆盖率目标，并使用 Vitest 的覆盖率报告工具。应更关注核心逻辑和关键组件的覆盖。
 - **Mocking**:
-    - 使用 Vitest 的 `vi.mock` 来 mock 依赖项 (如 API 服务、浏览器 API)。
-- **快照测试**: 谨慎使用，确保快照易于维护和理解。
+    - 使用 Vitest 的 `vi.mock` 来 mock 依赖项 (如 API 服务、浏览器 API、第三方库的特定模块或方法)。
+- **快照测试**: 谨慎使用，主要用于纯展示组件或确保 UI 结构在预期修改下发生变化。避免用于过于动态或复杂的组件，以减少维护成本。
 
 ## 8. Git Hooks
 - 推荐使用 `lint-staged` 配合 `husky` (或类似的工具) 在 `pre-commit` 钩子中运行 ESLint, Prettier, 和 Vitest (针对暂存文件).
