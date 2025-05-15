@@ -52,7 +52,6 @@ const handleLoginSubmit = async () => {
       loading.value = false;
     } else {
       console.log('Login form validation failed');
-      return false;
     }
   });
 };
