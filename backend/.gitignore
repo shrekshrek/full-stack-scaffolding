@@ -1,0 +1,43 @@
+# IDE specific files
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Python cache and virtual environment files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.env # Local environment variables, use .env.example as a template
+# .env.* # More specific local env files, if not meant to be versioned
+# !.env.example # Ensure example is not ignored if .env.* is broadly ignored
+
+# SQLite database files
+# Ignore all .db files in the project, especially in the db/ directory
+*.db
+*.db-journal # SQLite journal files
+/db/*.db
+/db/*.db-journal
+
+# Build artifacts
+/dist/
+/build/
+*.egg-info/
+
+# Test reports
+htmlcov/
+.coverage
+
+# Logs
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db 

@@ -1,57 +1,44 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.apis.v1 import api_router as api_v1_router # Ensure this matches the actual import path
-# from app.apis.v1 import api_router as api_v1_router # Placeholder
-from app.core.config import get_settings
-from app.core.redis_client import get_redis_pool_instance, close_redis_pool # For startup/shutdown
-
-settings = get_settings()
+from app.apis.v1 import api_router_v1 # Use the correct variable name from apis/v1/__init__.py
+from app.core.config import settings # Import settings directly
+# from app.core.redis_client import get_redis_pool_instance, close_redis_pool # For startup/shutdown
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    version="0.1.0" # Added version
 )
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origins=settings.BACKEND_CORS_ORIGINS, # Directly use the list from settings
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
 
-app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 
-@app.get("/api/health")
-def health_check():
+@app.get("/api/health") # Keep a simple health check outside API version prefix
+async def health_check(): # Make it async
     return {"status": "OK"}
 
-@app.on_event("startup")
-async def startup_event():
-    print("Starting up application...")
-    get_redis_pool_instance()  # Initialize Redis pool
-    # You can add a ping to Redis here if desired, as shown in redis_client.py comments
-    print("Redis pool initialized.")
-    # from app.core.db import init_db # If you have an init_db function
-    # await init_db()
-    # print("Database initialized.")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    print("Shutting down application...")
-    await close_redis_pool()
-    print("Redis connection pool closed.")
-
-# Add startup/shutdown events if needed
+# Comment out Redis related startup/shutdown for now
 # @app.on_event("startup")
 # async def startup_event():
-#     # Initialize DB, Redis, etc.
-#     pass
+#     print("Starting up application...")
+#     # get_redis_pool_instance()  # Initialize Redis pool
+#     # print("Redis pool initialized.")
+#     # from app.core.db import init_db # If you have an init_db function
+#     # await init_db()
+#     # print("Database initialized.")
 
 # @app.on_event("shutdown")
 # async def shutdown_event():
-#     # Close DB, Redis connections, etc.
-#     pass 
+#     print("Shutting down application...")
+#     # await close_redis_pool()
+#     # print("Redis connection pool closed.") 

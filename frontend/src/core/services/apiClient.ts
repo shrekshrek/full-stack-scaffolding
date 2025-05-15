@@ -1,10 +1,11 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios'
 
-// Get API base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api' // Default to /api if not set
+// VITE_API_BASE_URL should contain the full path prefix, e.g.,
+// /api/v1 for dev (to be used with Vite proxy)
+// or https://api.example.com/api/v1 for production.
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL, // Directly use the env variable here
   headers: {
     'Content-Type': 'application/json',
     // You can add other default headers here

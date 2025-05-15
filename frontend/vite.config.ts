@@ -43,12 +43,13 @@ export default defineConfig({
     port: 3000, // 开发服务器端口
     open: false, // 是否自动打开浏览器
     proxy: {
-      // 可选：配置开发环境 API 代理
-      // '/api': {
-      //   target: 'http://localhost:8000', // 后端服务地址
-      //   changeOrigin: true,
-      //   // rewrite: (path) => path.replace(/^\/api/, '')
-      // }
+      // 配置开发环境 API 代理
+      '/api': {
+        target: 'http://localhost:8000', // 后端服务地址
+        changeOrigin: true, // 对于虚拟主机站点是必需的
+        // secure: false, // 如果后端服务是https且证书无效，可能需要设置
+        // rewrite: (path) => path.replace(/^\/api/, '') // 通常在后端路径不包含 /api 时使用
+      }
     },
   },
   build: {

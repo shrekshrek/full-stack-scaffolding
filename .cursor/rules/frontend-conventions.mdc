@@ -10,6 +10,7 @@ alwaysApply: false
 - **语言**: TypeScript (`[tsconfig.json](mdc:frontend/tsconfig.json)`)
 - **UI 框架**: Vue 3 with **Element Plus**.
     - Element Plus 组件按需引入 (通常由 `unplugin-vue-components` 自动处理，如 `[components.d.ts](mdc:frontend/components.d.ts)` 所示)。
+- **图表库**: **ECharts** (按需引入和使用)
 - **CSS方案**: **UnoCSS** (`[uno.config.ts](mdc:frontend/uno.config.ts)`) - 优先使用原子化类。Element Plus 样式定制可通过 CSS 变量或 UnoCSS 规则覆盖。
 - **状态管理**: **Pinia**
 - **路由**: Vue Router
@@ -32,7 +33,8 @@ alwaysApply: false
 │   └── (kebab-case)        # e.g., project-logo.svg
 │
 ├── core/                   # 核心/共享模块
-│   ├── services/           # 基础 API 客户端, 核心服务 (e.g., apiClient.ts)
+│   ├── services/           # 基础 API 客户端, 核心服务
+│   │   ├── apiClient.ts      # (通常是 Axios 实例配置)
 │   │   └── (camelCase.service.ts) # e.g., notificationService.ts
 │   ├── utils/              # 全局通用的工具函数 (e.g., date.utils.ts, string.utils.ts)
 │   │   └── (camelCase.utils.ts OR feature.utils.ts)
@@ -52,10 +54,14 @@ alwaysApply: false
 │   │   ├── views/          # 认证相关的页面/视图 (LoginView.vue)
 │   │   │   └── (PascalCaseView.vue)
 │   │   ├── store.ts        # 认证模块的 Pinia store (auth.store.ts)
-│   │   ├── services.ts     # 调用认证API的服务 (auth.api.ts)
-│   │   ├── composables.ts  # 特定于认证的 Composables (useAuthForm.ts)
+│   │   ├── service.ts      # 调用认证API的服务 (auth.service.ts)
+│   │   ├── composables/    # 特定于认证的 Composables (可选, e.g. useAuthForm.ts or auth.composables.ts)
+│   │   │   └── (useFeatureSpecific.composable.ts OR feature.composables.ts)
 │   │   ├── routes.ts       # 认证模块的子路由配置
-│   │   ├── types.ts        # 认证模块的类型定义
+│   │   ├── types.ts        # 认证模块的类型定义 (auth.types.ts)
+│   │   ├── __tests__/      # 认证模块的测试文件
+│   │   │   ├── store.spec.ts # e.g., auth.store.spec.ts
+│   │   │   └── (componentName.spec.ts)
 │   │   └── index.ts        # (可选) 模块出口，用于统一导出
 │   │
 │   ├── user-profile/       # 示例: 用户个人资料模块
@@ -65,10 +71,10 @@ alwaysApply: false
 │       └── ...
 │
 ├── styles/                 # 全局样式, Element Plus 主题覆盖, UnoCSS 自定义
-│   ├── main.scss           # (或 .css) 主样式入口
-│   ├── _variables.scss     # (或 .css) 自定义CSS变量
-│   ├── element-plus.scss   # (或 .css) Element Plus 主题变量覆盖
-│   └── uno-custom.css      # (可选) UnoCSS 额外自定义样式
+│   ├── main.scss           # (kebab-case.scss) 主样式入口
+│   ├── _variables.scss     # (kebab-case.scss) 自定义CSS变量
+│   ├── element-plus.scss   # (kebab-case.scss) Element Plus 主题变量覆盖
+│   └── uno-custom.scss     # (kebab-case.scss, 可选) UnoCSS 额外自定义样式
 │
 ├── types/                  # 自动生成的全局 .d.ts 文件 (vite-env.d.ts, components.d.ts, auto-imports.d.ts)
 │                           # (这些通常由 Vite 插件维护)
@@ -84,16 +90,17 @@ alwaysApply: false
         - `core/ui/` 下的通用基础组件可加前缀 `Base` 或 `App` (e.g., `BaseButton.vue`).
     - **Composables**: `useCamelCase.ts` (e.g., `useFormValidation.ts`).
     - **Pinia Stores**:
-        - 文件: 在 `features/feature-name/` 下通常为 `store.ts` 或 `featureName.store.ts`.
-        - Store ID: `camelCase` (e.g., `userAuth`, `productCart`).
+        - 文件: 在 `features/feature-name/` 下通常为 `store.ts` 或 `[featureName].store.ts`.
+        - Store ID: `camelCase` (e.g., `auth`, `cart`). 对应 `defineStore('auth', ...)`.
         - Getter/Action 命名: (见 Pinia 规范部分)。
-    - **Service/API 文件**: 在 `features/feature-name/` 下通常为 `services.ts` 或 `featureName.api.ts`。函数名应清晰。
+    - **Service/API 文件**: 在 `features/feature-name/` 下通常为 `service.ts` 或 `[featureName].service.ts`。函数名应清晰。
     - **路由配置文件**:
         - 主路由: `router.ts` 在 `src/` 下。
         - 功能模块路由: `routes.ts` 在 `features/feature-name/` 下。
     - **TypeScript 文件 (.ts)**: `camelCase.ts` 或 `kebab-case.ts` (除组件、特定模式如 store 外)。类型定义文件可为 `featureName.types.ts` 或 `types.ts`。
-    - **测试文件**: `*.spec.ts` 或 `*.test.ts`，通常与被测试文件同目录或在 `__tests__` 子目录内。
-        - 例如 `[frontend/src/features/auth/components/LoginForm.spec.ts](mdc:frontend/src/features/auth/components/LoginForm.spec.ts)`
+    - **测试文件**: `*.spec.ts` 或 `*.test.ts`，统一放置在被测试文件所在模块的 `__tests__` 子目录内。
+        - 例如 `[frontend/src/features/auth/__tests__/auth.store.spec.ts](mdc:frontend/src/features/auth/__tests__/auth.store.spec.ts)`
+        - 或 `[frontend/src/features/auth/components/__tests__/LoginForm.spec.ts](mdc:frontend/src/features/auth/components/__tests__/LoginForm.spec.ts)`
 
 ## 3. 组件开发规范 (Vue & Element Plus)
 - **优先使用 Element Plus**: 对于常见的 UI 需求，应首先考虑 Element Plus。
@@ -120,6 +127,7 @@ alwaysApply: false
     - 优先使用 UnoCSS 原子类进行布局和微调。
     - 对于 Element Plus 组件的样式微调，可尝试使用 UnoCSS 的 `@apply` 指令或直接通过 CSS 变量覆盖。
     - 复杂的、可复用的样式组合，考虑使用 UnoCSS 的快捷方式 (shortcuts) 定义在 `[uno.config.ts](mdc:frontend/uno.config.ts)`。
+    - 当原子类难以表达复杂样式或需要利用 SCSS/CSS 嵌套等特性时，可在 `<style scoped lang="scss">` 中编写组件特定样式。
 - **Element Plus 主题与样式定制**:
     - 全局主题色、字体、边框等主要通过修改 Element Plus 提供的 CSS 变量进行。
     - 避免直接修改 Element Plus 组件的内部类名，除非万不得已，因为这可能在库版本更新后失效。优先使用官方推荐的定制方法。
@@ -145,8 +153,8 @@ alwaysApply: false
 
 ## 5. API 调用规范
 - **Service 文件位置**:
-    - **特定功能模块 API 服务**: `[src/features/feature-name/services.ts](mdc:frontend/src/features/feature-name/services.ts)` (或 `*.api.ts`).
-    - **核心/通用 API 客户端配置**: `[src/core/services/apiClient.ts](mdc:frontend/src/core/services/apiClient.ts)`.
+    - **特定功能模块 API 服务**: `[src/features/feature-name/service.ts](mdc:frontend/src/features/feature-name/service.ts)` (或 `[featureName].service.ts`).
+    - **核心/通用 API 客户端配置**: `[src/core/services/apiClient.ts](mdc:frontend/src/core/services/apiClient.ts)`. 此文件通常负责配置 `axios` (或其他 HTTP 客户端) 实例, 包括基础 URL、超时、拦截器 (用于请求头如 Authorization token 注入、全局请求/响应转换、统一错误处理等)。
 - **统一处理**: 建议在上述 service 文件中或通过封装的 `axios` / `fetch` 实例中统一处理 API 请求、响应和错误。
     - `apiClient.ts` 中可配置基础 URL、拦截器 (请求头、错误处理、token刷新等)。
 - **Loading 与错误状态**: 组件或 Pinia store 应妥善处理 API 调用的加载状态和错误状态，并反馈给用户。
@@ -170,8 +178,8 @@ alwaysApply: false
 
 ## 7. 测试规范 (Vitest)
 - **测试文件位置**:
-    - 通常与被测试文件同级或在 `__tests__` 子目录内。
-    - 例如: `[frontend/src/features/auth/components/__tests__/LoginForm.spec.ts](mdc:frontend/src/features/auth/components/__tests__/LoginForm.spec.ts)`
+    - 测试文件统一放置在其所测试的源文件所属功能模块下的 `__tests__` 子目录中。
+    - 例如: `[frontend/src/features/auth/components/__tests__/LoginForm.spec.ts](mdc:frontend/src/features/auth/components/__tests__/LoginForm.spec.ts)` 或 `[frontend/src/features/auth/__tests__/auth.store.spec.ts](mdc:frontend/src/features/auth/__tests__/auth.store.spec.ts)`
 - **测试类型与策略**:
     - **单元测试**:
         - **核心逻辑优先**: 单元测试应优先覆盖项目的核心业务逻辑，包括：
@@ -192,10 +200,11 @@ alwaysApply: false
 - **JSDOM 环境的使用**:
     - 对于不涉及组件挂载和 DOM 操作的核心逻辑单元测试（例如纯 stores、纯 composables、工具函数），测试执行不依赖于 JSDOM 环境。如果全局测试环境配置为 JSDOM，这些测试也会在该环境下运行，通常没有负面影响但有轻微开销。
     - 对于 Vue 组件的单元测试（使用 `@vue/test-utils` 进行挂载和交互），则**必须**使用 DOM 环境。通常在 `vite.config.ts` 中将 `test.environment` 配置为 `'jsdom'` 或 `'happy-dom'`。在编写这类测试时，应明确 JSDOM 的局限性（它并非完整浏览器），并遵循信任第三方库、聚焦组件自身逻辑的策略（例如，通过模拟第三方库方法来控制行为分支）。
-    - 如果希望更细致地控制测试环境，可以将全局 `test.environment` 设置为 `'node'`，并在每个需要 DOM 的组件测试文件顶部使用 `// @vitest-environment jsdom` 指令。
+    - 如果希望更细致地控制测试环境，可以将全局 `test.environment` 设置为 `'node'`，并在每个需要 DOM 的组件测试文件顶部使用 `// @vitest-environment jsdom` 或 `// @vitest-environment happy-dom` 指令。
 - **覆盖率**: 设定合理的测试覆盖率目标，并使用 Vitest 的覆盖率报告工具。应更关注核心逻辑和关键组件的覆盖。
 - **Mocking**:
-    - 使用 Vitest 的 `vi.mock` 来 mock 依赖项 (如 API 服务、浏览器 API、第三方库的特定模块或方法)。
+    - 使用 Vitest 的 `vi.mock` 来 mock 依赖项 (如 API 服务 `vi.mock('@/core/services/apiClient')`、浏览器 API、第三方库的特定模块或方法)。
+    - Pinia store 测试中，通常需要通过 `setActivePinia(createPinia())` 初始化 Pinia 环境。
 - **快照测试**: 谨慎使用，主要用于纯展示组件或确保 UI 结构在预期修改下发生变化。避免用于过于动态或复杂的组件，以减少维护成本。
 
 ## 8. Git Hooks

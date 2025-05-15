@@ -1,15 +1,15 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from app.core.config import get_settings
-
-settings = get_settings()
+# Use the directly instantiated settings object
+from app.core.config import settings 
 
 # Create async engine instance
 engine = create_async_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True, # Good practice for checking connections
     # echo=True, # Uncomment for SQLAlchemy Core & ORM logging, can be verbose
+    connect_args={"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {} # Specific for SQLite
 )
 
 # Create sessionmaker instance for async sessions

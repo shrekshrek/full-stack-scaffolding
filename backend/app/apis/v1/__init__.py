@@ -1,13 +1,11 @@
 from fastapi import APIRouter
 
-# Import your endpoint modules here when they are created
-# from .endpoints import auth, users, ai_service # Example
+from app.apis.v1.endpoints import auth # Import your endpoint modules here
+# from app.apis.v1.endpoints import users # Example for other endpoints
 
-api_router = APIRouter()
+api_router_v1 = APIRouter()
 
-# Include routers from endpoint modules
-# api_router.include_router(auth.router, tags=["Authentication"], prefix="/auth")
-# api_router.include_router(users.router, tags=["Users"], prefix="/users")
-# api_router.include_router(ai_service.router, tags=["AI Service"], prefix="/ai")
+api_router_v1.include_router(auth.router, prefix="/auth", tags=["Authentication"]) # Add auth router
+# api_router_v1.include_router(users.router, prefix="/users", tags=["Users"]) # Example for other routers
 
 # This v1 router will be included in the main app instance 

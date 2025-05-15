@@ -1,11 +1,28 @@
-"""This file is used to bootstrap the Alembic migration environment.
-It's usually called by the `alembic` command line tool.
+"""${message}
+
+Revision ID: ${up_revision}
+Revises: ${down_revision | comma,n}
+Create Date: ${create_date}
+
 """
+from typing import Sequence, Union
 
-# Import this to ensure your models are registered with SQLAlchemy's MetaData
-# from app.models import user # Example: import your models here
+from alembic import op
+import sqlalchemy as sa
+${imports if imports else ""}
 
-# from app.models.base import Base # Ensure Base is imported if models are spread out
+# revision identifiers, used by Alembic.
+revision: str = ${repr(up_revision)}
+down_revision: Union[str, None] = ${repr(down_revision)}
+branch_labels: Union[str, Sequence[str], None] = ${repr(branch_labels)}
+depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
 
-# You might not need to explicitly import models if your env.py correctly
-# sets up target_metadata by importing the Base from your models package. 
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    ${upgrades if upgrades else "pass"}
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    ${downgrades if downgrades else "pass"}

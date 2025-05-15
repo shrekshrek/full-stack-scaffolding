@@ -8,15 +8,17 @@ authors = [
 dependencies = [
     "fastapi>=0.100.0",
     "uvicorn[standard]>=0.20.0",
-    "pydantic>=2.0.0",
+    "pydantic[email]>=2.0.0",
     "pydantic-settings>=2.0.0",
     "python-dotenv>=1.0.0",
     "sqlalchemy[asyncio]>=2.0.0",
-    "asyncpg", # For PostgreSQL, or use "aiomysql" for MySQL, "aiosqlite" for SQLite
+    "aiosqlite",
     "alembic>=1.9.0",
-    "redis[hiredis]>=5.0.0", # For redis-py async client
-    "langchain>=0.1.0",     # Or more specific langchain packages
-    "langchain-openai",     # Example LLM provider
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "redis[hiredis]>=5.0.0",
+    "langchain>=0.1.0",
+    "langchain-openai",
     # Add other dependencies here
 ]
 requires-python = ">=3.11"
@@ -36,20 +38,20 @@ dev = [
     "flower>=1.0.0", # For Celery monitoring
 ]
 
-[project.scripts]
-start_dev = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
-run_tests = "pytest"
-run_lint = "ruff check . && black --check . && mypy ."
-apply_lint = "ruff check . --fix && black ."
-db_migrate = "alembic upgrade head"
-db_revision = "alembic revision -m" # Usage: pdm run db_revision "your message"
-
 [build-system]
 requires = ["pdm-pep517>=1.0"]
 build-backend = "pdm.pep517.api"
 
 [tool.pdm]
 python_version = "3.11" # Ensure this matches project.requires-python
+
+[tool.pdm.scripts]
+start_dev = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+run_tests = "pytest"
+run_lint = "ruff check . && black --check . && mypy ."
+apply_lint = "ruff check . --fix && black ."
+db_migrate = "alembic upgrade head"
+db_revision = "alembic revision"
 
 [tool.black]
 line-length = 88
