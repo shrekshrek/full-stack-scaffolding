@@ -15,11 +15,11 @@ dependencies = [
     "aiosqlite",
     "alembic>=1.9.0",
     "python-jose[cryptography]>=3.3.0",
-    "passlib[bcrypt]>=1.7.4",
     "redis[hiredis]>=5.0.0",
     "langchain>=0.1.0",
     "langchain-openai",
     # Add other dependencies here
+    "passlib[bcrypt]>=1.7.4"
 ]
 requires-python = ">=3.11"
 readme = "README.md"
