@@ -25,10 +25,10 @@ export interface User {
   id: string | number;
   email: string;
   username: string;
-  displayName?: string; // Added for a more friendly display name
+  nickname?: string;   // Replaces displayName, and made primary for user-friendly name
   avatarUrl?: string;   // Added for user avatar
-  // roles?: string[];
-  // permissions?: string[];
+  roles?: string[];    // Added for user roles
+  permissions?: string[]; // Added for user permissions
 } 
 
 export interface AuthState {

@@ -23,10 +23,10 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthRespon
 
 /**
  * Fetches the current authenticated user's data.
- * @returns A promise that resolves to an object containing the user data.
+ * @returns A promise that resolves to the user data.
  */
-export async function fetchCurrentUserData(): Promise<{ user: User }> { 
-  const response = await apiClient.get<{ user: User }>('/auth/me');
+export async function fetchCurrentUserData(): Promise<User> {
+  const response = await apiClient.get<User>('/auth/me');
   return response.data;
 }
 

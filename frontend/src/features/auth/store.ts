@@ -102,14 +102,13 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true;
     console.log('[AuthStore] fetchCurrentUser: Attempting to fetch user data with token:', accessToken.value);
     try {
-      const userDataResponse = await authService.fetchCurrentUserData(); // Use service
+      const userDataResponse = await authService.fetchCurrentUserData();
       console.log('[AuthStore] fetchCurrentUser API response:', userDataResponse);
-      // Ensure we are setting the user property from the response, not the whole response object itself.
-      // Assuming userDataResponse directly is the user object or has a user property e.g. userDataResponse.data.user
-      currentUser.value = userDataResponse.user; // Adjust if structure is different, e.g., userDataResponse.data?.user
+      // API directly returns the user object, and service now reflects this
+      currentUser.value = userDataResponse; 
       console.log('[AuthStore] fetchCurrentUser success - currentUser:', currentUser.value);
     } catch (e: any) {
-      console.error('Failed to fetch current user:', e);
+      console.error('[AuthStore] Failed to fetch current user:', e);
       // If fetching user fails (e.g. token invalid), clear auth state
       setAuthData(null, null); 
       console.log('[AuthStore] fetchCurrentUser error - currentUser set to null, isLoggedIn:', isLoggedIn.value);

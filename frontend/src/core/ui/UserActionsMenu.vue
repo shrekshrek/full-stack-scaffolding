@@ -3,9 +3,9 @@
     <el-dropdown @command="handleCommand">
       <span class="el-dropdown-link flex items-center cursor-pointer">
         <el-avatar :size="32" :src="currentUser.avatarUrl" class="mr-2">
-          {{ currentUser.displayName ? currentUser.displayName[0] : currentUser.username[0] }}
+          {{ currentUser.nickname ? currentUser.nickname[0] : (currentUser.username ? currentUser.username[0] : 'U') }}
         </el-avatar>
-        <span class="hidden md:inline">{{ currentUser.displayName || currentUser.username }}</span>
+        <span class="hidden md:inline">{{ currentUser.nickname || currentUser.username }}</span>
         <el-icon class="el-icon--right hidden md:inline"><arrow-down /></el-icon>
       </span>
       <template #dropdown>

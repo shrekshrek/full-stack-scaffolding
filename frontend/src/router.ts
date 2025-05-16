@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory, RouteRecordRaw, RouterScrollBehavior } from 'vue-router'
-import { useAuthStore, authRoutes } from '@/features/auth' // Consolidated import
+import { useAuthStore, authRoutes } from '@/features/auth' // Consolidated import, authRoutes now includes user profile route
 
 // Import feature routes here if they are in separate files
 import { dashboardRoutes } from '@/features/dashboard' // Updated import for dashboard routes
 // Example: import userRoutes from '@/features/user-profile/routes'
-import { userProfileRoutes } from '@/features/user-profile' // Import user profile routes
+// import { userProfileRoutes } from '@/features/user-profile' // REMOVED: User profile routes are now part of authRoutes
 
 const routes: Array<RouteRecordRaw> = [
   // Define your routes here
@@ -19,10 +19,10 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   // Example route for a feature (auth)
-  ...authRoutes, // Spread auth routes here
+  ...authRoutes, // Spread auth routes here (includes user profile route)
   ...dashboardRoutes, // Spread dashboard routes here
   // ...userRoutes,
-  ...userProfileRoutes, // Spread user profile routes here
+  // ...userProfileRoutes, // REMOVED: User profile routes are now part of authRoutes
 
   // Catch-all 404 route (optional, but good practice)
   {
