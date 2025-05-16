@@ -55,17 +55,17 @@ alwaysApply: false
 │   │   │   └── (PascalCaseView.vue)
 │   │   ├── store.ts        # 认证模块的 Pinia store (auth.store.ts)
 │   │   ├── service.ts      # 调用认证API的服务 (auth.service.ts)
-│   │   ├── composables/    # 特定于认证的 Composables (可选, e.g. useAuthForm.ts or auth.composables.ts)
+│   │   ├── composables/    # 特定于认证的 Composables (e.g. useAuthForm.ts)
 │   │   │   └── (useFeatureSpecific.composable.ts OR feature.composables.ts)
 │   │   ├── routes.ts       # 认证模块的子路由配置
 │   │   ├── types.ts        # 认证模块的类型定义 (auth.types.ts)
 │   │   ├── __tests__/      # 认证模块的测试文件
 │   │   │   ├── store.spec.ts # e.g., auth.store.spec.ts
 │   │   │   └── (componentName.spec.ts)
-│   │   └── index.ts        # (可选) 模块出口，用于统一导出
+│   │   └── index.ts        # 模块出口，用于统一导出和封装
 │   │
 │   ├── user-profile/       # 示例: 用户个人资料模块
-│   │   └── ... (类似 auth 模块结构)
+│   │   └── ... (类似 auth 模块结构, 包含 index.ts)
 │   │
 │   └── (another-feature)/  # 其他功能模块...
 │       └── ...

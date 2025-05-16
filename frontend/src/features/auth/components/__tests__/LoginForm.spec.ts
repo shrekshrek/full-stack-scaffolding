@@ -114,7 +114,7 @@ describe('LoginForm.vue', () => {
   })
 
   it('renders initial form elements', () => {
-    expect(wrapper.find('input[type="email"]').exists()).toBe(true)
+    expect(wrapper.find('input[type="text"]').exists()).toBe(true)
     expect(wrapper.find('input[type="password"]').exists()).toBe(true)
     const buttons = wrapper.findAllComponents({ name: 'ElButton' })
     console.log('Found ElButtons:', buttons.length)
@@ -127,14 +127,14 @@ describe('LoginForm.vue', () => {
     expect(submitButton?.text()).toBe('登录')
   })
 
-  it('binds email and password to loginData', async () => {
-    const emailInput = wrapper.find('input[type="email"]')
+  it('binds username and password to loginData', async () => {
+    const usernameInput = wrapper.find('input[type="text"]')
     const passwordInput = wrapper.find('input[type="password"]')
 
-    await emailInput.setValue('test@example.com')
+    await usernameInput.setValue('testuser')
     await passwordInput.setValue('password123')
 
-    expect(wrapper.vm.loginData.email).toBe('test@example.com')
+    expect(wrapper.vm.loginData.username).toBe('testuser')
     expect(wrapper.vm.loginData.password).toBe('password123')
   })
 
@@ -173,24 +173,9 @@ describe('LoginForm.vue', () => {
       validateSpy?.mockRestore() // Restore original validate method
     })
 
-    it('does not call authStore.login if email is empty', async () => {
+    it('does not call authStore.login if username is empty', async () => {
       expect(formInstance).toBeDefined() // Ensure formInstance was set up
-      await wrapper.find('input[type="email"]').setValue('')
-      await wrapper.find('input[type="password"]').setValue('password123')
-
-      await wrapper.find('form').trigger('submit.prevent')
-      await flushPromises()
-      await wrapper.vm.$nextTick()
-
-      expect(validateSpy).toHaveBeenCalled()
-      expect(mockAuthStoreLogin).not.toHaveBeenCalled()
-    })
-
-    it('does not call authStore.login if email format is invalid', async () => {
-      expect(formInstance).toBeDefined()
-      // Override the default spy behavior for this specific test if needed,
-      // but the default mock already simulates failure.
-      await wrapper.find('input[type="email"]').setValue('invalid-email')
+      await wrapper.find('input[type="text"]').setValue('')
       await wrapper.find('input[type="password"]').setValue('password123')
 
       await wrapper.find('form').trigger('submit.prevent')
@@ -203,7 +188,7 @@ describe('LoginForm.vue', () => {
 
     it('does not call authStore.login if password is empty', async () => {
       expect(formInstance).toBeDefined()
-      await wrapper.find('input[type="email"]').setValue('test@example.com')
+      await wrapper.find('input[type="text"]').setValue('testuser')
       await wrapper.find('input[type="password"]').setValue('')
 
       await wrapper.find('form').trigger('submit.prevent')
@@ -218,21 +203,23 @@ describe('LoginForm.vue', () => {
   // --- Submission Tests ---
   describe('Form Submission', () => {
     let formInstance: FormInstance | undefined
-    let validateSpy: ReturnType<typeof vi.spyOn>
+    let validateSpy: any // Revert to any for simplicity if strict typing is problematic
 
     beforeEach(async () => {
-      // For submission tests, we usually want validation to pass.
       formInstance = wrapper.vm.loginFormRef
       await flushPromises()
       await wrapper.vm.$nextTick()
       if (formInstance) {
+        // Ensure the mock implementation focuses on the callback usage in the component
         validateSpy = vi
-          .spyOn(formInstance, 'validate')
+          .spyOn(formInstance as any, 'validate')
           .mockImplementation((callback?: (isValid: boolean) => void) => {
             if (typeof callback === 'function') {
-              callback(true) // Simulate validation success
+              callback(true) // Simulate validation success for these tests
             }
-            return Promise.resolve(true) // if component also uses promise
+            // The component primarily uses the callback, but returning a resolved promise
+            // can prevent issues if any part of the chain awaits it.
+            return Promise.resolve(true)
           })
       }
       mockAuthStoreLogin.mockClear()
@@ -248,7 +235,7 @@ describe('LoginForm.vue', () => {
       expect(formInstance).toBeDefined()
       mockAuthStoreLogin.mockResolvedValue(true)
 
-      await wrapper.find('input[type="email"]').setValue('test@example.com')
+      await wrapper.find('input[type="text"]').setValue('testuser')
       await wrapper.find('input[type="password"]').setValue('password123')
 
       await wrapper.find('form').trigger('submit.prevent')
@@ -257,7 +244,7 @@ describe('LoginForm.vue', () => {
       expect(validateSpy).toHaveBeenCalled()
       expect(mockAuthStoreLogin).toHaveBeenCalledTimes(1)
       expect(mockAuthStoreLogin).toHaveBeenCalledWith({
-        email: 'test@example.com',
+        username: 'testuser',
         password: 'password123',
       })
       expect(mockRouterPushFn).toHaveBeenCalledTimes(1)
@@ -271,7 +258,7 @@ describe('LoginForm.vue', () => {
       mockAuthStoreLogin.mockResolvedValue(false)
       mockedAuthStoreInstance.error = loginError.message
 
-      await wrapper.find('input[type="email"]').setValue('test@example.com')
+      await wrapper.find('input[type="text"]').setValue('testuser')
       await wrapper.find('input[type="password"]').setValue('wrongpassword')
 
       await wrapper.find('form').trigger('submit.prevent')
@@ -302,7 +289,7 @@ describe('LoginForm.vue', () => {
       // Ensure component's loading ref is initially false if not already by beforeEach
       wrapper.vm.loading = false // Directly set for test clarity before action
 
-      await wrapper.find('input[type="email"]').setValue('test@example.com')
+      await wrapper.find('input[type="text"]').setValue('testuser')
       await wrapper.find('input[type="password"]').setValue('password123')
 
       wrapper.find('form').trigger('submit.prevent') // Don't await this directly
@@ -333,12 +320,12 @@ describe('LoginForm.vue', () => {
     /*
     it('does not call authStore.login if form validation fails', async () => {
       if (formInstance) { // Ensure spy is setup if we are to re-use this test
-        validateSpy = vi.spyOn(formInstance, 'validate').mockImplementation((callback?: (isValid: boolean) => void) => {
+        validateSpy = vi.spyOn(formInstance as any, 'validate').mockImplementation((callback?: (isValid: boolean) => void) => {
           if (typeof callback === 'function') callback(false); // Simulate validation failure
           return Promise.resolve(false);
         });
       }
-      await wrapper.find('input[type="email"]').setValue(''); 
+      await wrapper.find('input[type="text"]').setValue(''); 
       await wrapper.find('input[type="password"]').setValue('password123');
       
       await wrapper.find('form').trigger('submit.prevent');

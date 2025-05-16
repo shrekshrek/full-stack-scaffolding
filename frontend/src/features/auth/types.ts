@@ -1,19 +1,22 @@
 // Types specific to the Authentication feature module
 
 export interface LoginCredentials {
-  email: string;
+  username: string;
   password: string;
 }
 
-export interface RegisterPayload extends LoginCredentials {
+export interface RegisterPayload extends Omit<LoginCredentials, 'username'> {
   username: string;
+  email: string;
+  password: string;
   // add other registration fields if needed
 }
 
 export interface AuthResponse {
   user: User;
-  accessToken: string;
+  access_token: string;
   refreshToken?: string; // Optional
+  token_type?: string; // Added to match API response, optional
 }
 
 // You might want to define a more specific User type for auth contexts
@@ -22,6 +25,8 @@ export interface User {
   id: string | number;
   email: string;
   username: string;
+  displayName?: string; // Added for a more friendly display name
+  avatarUrl?: string;   // Added for user avatar
   // roles?: string[];
   // permissions?: string[];
 } 

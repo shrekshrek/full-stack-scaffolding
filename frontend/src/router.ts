@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory, RouteRecordRaw, RouterScrollBehavior } from 'vue-router'
-import { useAuthStore } from '@/features/auth/store' // Import auth store for navigation guards
+import { useAuthStore, authRoutes } from '@/features/auth' // Consolidated import
 
 // Import feature routes here if they are in separate files
-import authRoutes from '@/features/auth/routes' // Import auth routes
-import dashboardRoutes from '@/features/dashboard/routes' // Import dashboard routes
+import { dashboardRoutes } from '@/features/dashboard' // Updated import for dashboard routes
 // Example: import userRoutes from '@/features/user-profile/routes'
+import { userProfileRoutes } from '@/features/user-profile' // Import user profile routes
 
 const routes: Array<RouteRecordRaw> = [
   // Define your routes here
@@ -12,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/features/home/views/HomeView.vue'), // Lazy load home view
+    component: () => import('@/features/home').then(m => m.HomeView), // Lazy load HomeView via module index
     meta: {
       // layout: 'DefaultLayout', // Example: specify layout for this route
       requiresAuth: false,
@@ -22,6 +22,7 @@ const routes: Array<RouteRecordRaw> = [
   ...authRoutes, // Spread auth routes here
   ...dashboardRoutes, // Spread dashboard routes here
   // ...userRoutes,
+  ...userProfileRoutes, // Spread user profile routes here
 
   // Catch-all 404 route (optional, but good practice)
   {

@@ -1,7 +1,7 @@
 <template>
   <el-form @submit.prevent="handleLoginSubmit" ref="loginFormRef" :model="loginData">
-    <el-form-item prop="email" label="邮箱" :rules="[{ required: true, message: '请输入邮箱地址', trigger: 'blur' }, { type: 'email', message: '请输入有效的邮箱地址', trigger: ['blur', 'change'] }]">
-      <el-input v-model="loginData.email" type="email" placeholder="请输入邮箱" />
+    <el-form-item prop="username" label="用户名" :rules="[{ required: true, message: '请输入用户名', trigger: 'blur' }]">
+      <el-input v-model="loginData.username" type="text" placeholder="请输入用户名" />
     </el-form-item>
     <el-form-item prop="password" label="密码" :rules="[{ required: true, message: '请输入密码', trigger: 'blur' }]">
       <el-input v-model="loginData.password" type="password" placeholder="请输入密码" show-password />
@@ -29,12 +29,12 @@ const authStore = useAuthStore();
 const loginFormRef = ref<FormInstance>();
 
 const loginData = reactive({
-  email: '',
+  username: '',
   password: '',
 });
 
 const loading = ref(false);
-const formError = ref<string | null>(null); // Renamed from error to avoid conflict if this becomes a prop
+const formError = ref<string | null>(null);
 
 const handleLoginSubmit = async () => {
   if (!loginFormRef.value) return;

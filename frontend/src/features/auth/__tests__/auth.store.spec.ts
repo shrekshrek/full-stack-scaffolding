@@ -104,7 +104,7 @@ describe('Auth Store', () => {
 
   // --- Tests for login action ---
   describe('login action', () => {
-    const loginCredentials: LoginCredentials = { email: 'test@example.com', password: 'password123' };
+    const loginCredentials: LoginCredentials = { username: 'testuser', password: 'password123' };
     const mockUser: User = { id: '1', email: 'test@example.com', username: 'testuser' };
     const mockToken = 'mock-login-token';
     const mockAuthResponse: AuthResponse = { user: mockUser, accessToken: mockToken };

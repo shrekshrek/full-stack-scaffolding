@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import apiClient from '@/core/services/apiClient' // Your API client
 import type { LoginCredentials, RegisterPayload, User, AuthResponse } from './types' // Feature-specific types
+import * as authService from './service'; // Import the service functions
 
 // Placeholder types until actual types are defined
 // interface User { id: string; email: string; fullName?: string; }
@@ -22,6 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setAuthData(user: User | null, token: string | null) {
+    console.log('[AuthStore] setAuthData called with user:', user, 'token:', token);
     currentUser.value = user
     accessToken.value = token
     if (token) {
@@ -32,18 +34,24 @@ export const useAuthStore = defineStore('auth', () => {
       delete apiClient.defaults.headers.common['Authorization'];
     }
     error.value = null
+    console.log('[AuthStore] setAuthData finished - currentUser:', currentUser.value, 'accessToken:', accessToken.value, 'isLoggedIn:', isLoggedIn.value);
   }
 
   async function login(credentials: LoginCredentials) {
     isLoading.value = true
     error.value = null
+    console.log('[AuthStore] Attempting login with:', credentials);
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/login', credentials)
-      setAuthData(response.data.user, response.data.accessToken)
+      const authDataResponse = await authService.loginUser(credentials);
+      console.log('[AuthStore] Login API response:', authDataResponse);
+      setAuthData(authDataResponse.user, authDataResponse.access_token)
+      console.log('[AuthStore] After login setAuthData - currentUser:', currentUser.value, 'isLoggedIn:', isLoggedIn.value);
       return true;
     } catch (e: any) {
       const message = e.response?.data?.message || e.message || 'Login failed'
+      console.error('[AuthStore] Login API error:', message, e);
       setAuthData(null, null)
+      console.log('[AuthStore] After login error setAuthData - currentUser:', currentUser.value, 'isLoggedIn:', isLoggedIn.value);
       error.value = message
       return false;
     } finally {
@@ -54,13 +62,18 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(payload: RegisterPayload) {
     isLoading.value = true
     error.value = null
+    console.log('[AuthStore] Attempting registration with:', payload);
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/register', payload)
-      setAuthData(response.data.user, response.data.accessToken)
+      const authDataResponse = await authService.registerUser(payload);
+      console.log('[AuthStore] Register API response:', authDataResponse);
+      setAuthData(authDataResponse.user, authDataResponse.access_token)
+      console.log('[AuthStore] After register setAuthData - currentUser:', currentUser.value, 'isLoggedIn:', isLoggedIn.value);
       return true;
     } catch (e: any) {
       const message = e.response?.data?.message || e.message || 'Registration failed'
+      console.error('[AuthStore] Register API error:', message, e);
       setAuthData(null, null)
+      console.log('[AuthStore] After register error setAuthData - currentUser:', currentUser.value, 'isLoggedIn:', isLoggedIn.value);
       error.value = message
       return false;
     } finally {
@@ -69,15 +82,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout() {
+    console.log('[AuthStore] Attempting logout.');
     try {
-      // Optional: notify backend. Backend should clear the session/token if necessary.
-      // await apiClient.post('/auth/logout'); 
+      await authService.logoutUser();
     } catch (e) {
-      console.error("Error during logout API call:", e)
+      console.error("[AuthStore] Error during logout API call:", e)
     }
     setAuthData(null, null)
-    // router.push('/login'); // Consider moving redirection logic to the component that calls logout
-    console.log('Logged out')
+    console.log('[AuthStore] Logged out - currentUser:', currentUser.value, 'isLoggedIn:', isLoggedIn.value);
   }
 
   async function fetchCurrentUser() {
@@ -88,18 +100,19 @@ export const useAuthStore = defineStore('auth', () => {
       return;
     }
     isLoading.value = true;
+    console.log('[AuthStore] fetchCurrentUser: Attempting to fetch user data with token:', accessToken.value);
     try {
-      // Assuming the /auth/me endpoint returns the user object directly or { user: User }
-      const response = await apiClient.get<{ user: User }>('/auth/me'); 
-      // If response is { user: User }, then use response.data.user
-      // If response is User directly, then use response.data
-      // For this example, let's assume it returns { user: User }
-      currentUser.value = response.data.user; 
-      // We already have a token, so no need to setAuthData unless token needs refresh/revalidation from response
+      const userDataResponse = await authService.fetchCurrentUserData(); // Use service
+      console.log('[AuthStore] fetchCurrentUser API response:', userDataResponse);
+      // Ensure we are setting the user property from the response, not the whole response object itself.
+      // Assuming userDataResponse directly is the user object or has a user property e.g. userDataResponse.data.user
+      currentUser.value = userDataResponse.user; // Adjust if structure is different, e.g., userDataResponse.data?.user
+      console.log('[AuthStore] fetchCurrentUser success - currentUser:', currentUser.value);
     } catch (e: any) {
       console.error('Failed to fetch current user:', e);
       // If fetching user fails (e.g. token invalid), clear auth state
       setAuthData(null, null); 
+      console.log('[AuthStore] fetchCurrentUser error - currentUser set to null, isLoggedIn:', isLoggedIn.value);
     }
     finally {
       isLoading.value = false;
@@ -108,7 +121,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Initialize store: if token exists, try to fetch user data
   if (accessToken.value && !currentUser.value) { // Fetch only if user is not already set
+     console.log('[AuthStore] Initializing: Token found, currentUser not set. Fetching current user.');
      fetchCurrentUser(); 
+  } else if (accessToken.value && currentUser.value) {
+    console.log('[AuthStore] Initializing: Token found, currentUser IS set. User:', currentUser.value);
+  } else {
+    console.log('[AuthStore] Initializing: No token found or currentUser already set.');
   }
 
 
