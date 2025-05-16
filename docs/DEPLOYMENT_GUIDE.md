@@ -67,7 +67,7 @@ cd <project_directory>
     ```
 2.  **安装依赖**:
     ```bash
-    pdm install
+    pdm install --dev
     ```
     PDM 会自动创建并管理虚拟环境。
 3.  **环境变量**:
