@@ -1,5 +1,5 @@
 <template>
-  <div class="login-view flex justify-center items-center min-h-screen bg-gray-100">
+  <div class="login-view flex justify-center items-center bg-gray-100">
     <el-card class="w-full max-w-sm shadow-lg">
       <template #header>
         <div class="text-2xl font-bold text-center">欢迎回来</div>

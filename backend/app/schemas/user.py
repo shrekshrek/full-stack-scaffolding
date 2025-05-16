@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, model_validator # model_validator for Pydantic v2
-from typing import Optional
+from typing import Optional, List
 
 # Shared properties
 class UserBase(BaseModel):
@@ -7,6 +7,10 @@ class UserBase(BaseModel):
     username: str
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
+    nickname: Optional[str] = None
+    avatar_url: Optional[str] = None
+    roles: Optional[List[str]] = None
+    permissions: Optional[List[str]] = None
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):

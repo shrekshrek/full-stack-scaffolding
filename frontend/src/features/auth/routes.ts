@@ -6,7 +6,7 @@ const authRoutes: Array<RouteRecordRaw> = [
     name: 'Login',
     component: () => import('@/features/auth/views/LoginView.vue'), // Lazy load LoginView using alias
     meta: {
-      // layout: 'AuthLayout', // Example: specify a different layout for login page
+      layout: 'AuthLayout', // Example: specify a different layout for login page
       guest: true, // Example: For routes accessible only by unauthenticated users
     },
   },
@@ -16,7 +16,7 @@ const authRoutes: Array<RouteRecordRaw> = [
     name: 'Register',
     component: () => import('@/features/auth/views/RegisterView.vue'), // Lazy load RegisterView using alias
     meta: {
-      // layout: 'AuthLayout', // Example: specify a different layout for register page
+      layout: 'AuthLayout', // Example: specify a different layout for register page
       guest: true,
     },
   },

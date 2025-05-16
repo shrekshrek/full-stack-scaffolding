@@ -12,11 +12,13 @@ import { useRoute } from 'vue-router';
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue';
 // Example: For other layouts, you might use async components
 // const AdminLayout = defineAsyncComponent(() => import('@/core/layouts/AdminLayout.vue'));
+const AuthLayout = defineAsyncComponent(() => import('@/core/layouts/AuthLayout.vue'));
 
 const route = useRoute();
 
 const layouts: Record<string, any> = {
   DefaultLayout: markRaw(DefaultLayout),
+  AuthLayout: markRaw(AuthLayout),
   // AdminLayout: markRaw(AdminLayout), // If you had an AdminLayout
 };
 
