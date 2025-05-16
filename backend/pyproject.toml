@@ -19,7 +19,8 @@ dependencies = [
     "langchain>=0.1.0",
     "langchain-openai",
     # Add other dependencies here
-    "passlib[bcrypt]>=1.7.4"
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=3.2.0"
 ]
 requires-python = ">=3.11"
 readme = "README.md"

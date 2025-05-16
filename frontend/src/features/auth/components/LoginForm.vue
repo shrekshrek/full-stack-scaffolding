@@ -19,11 +19,12 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/features/auth/store';
 import type { FormInstance } from 'element-plus';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const loginFormRef = ref<FormInstance>();
@@ -45,7 +46,12 @@ const handleLoginSubmit = async () => {
       formError.value = null;
       const success = await authStore.login(loginData);
       if (success) {
-        router.push('/'); // Redirect to homepage or dashboard
+        const redirectPath = route.query.redirect;
+        if (typeof redirectPath === 'string' && redirectPath) {
+          router.push(redirectPath);
+        } else {
+          router.push('/'); // Default redirect to homepage
+        }
       } else {
         formError.value = authStore.error || '登录失败，请检查您的凭据。';
       }

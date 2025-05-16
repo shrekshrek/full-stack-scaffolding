@@ -7,7 +7,7 @@
       <RegisterForm />
       <div class="mt-6 text-center">
         <span class="text-gray-600">已经有账户了？</span>
-        <router-link to="/login" class="text-blue-500 hover:text-blue-700 font-medium">
+        <router-link :to="{ path: '/login', query: route.query.redirect ? { redirect: route.query.redirect } : {} }" class="text-blue-500 hover:text-blue-700 font-medium">
           立即登录
         </router-link>
       </div>
@@ -17,6 +17,9 @@
 
 <script setup lang="ts">
 import RegisterForm from '@/features/auth/components/RegisterForm.vue'
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
 
 // Logic for RegisterView, if any, would go here.
 // For example, handling query params or specific layout concerns.

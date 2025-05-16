@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import {
   ElForm,
   ElFormItem,
@@ -53,6 +53,7 @@ import { useAuthStore } from '@/features/auth/store'
 import type { RegisterPayload } from '@/features/auth/types'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const registerFormRef = ref<FormInstance>()
@@ -118,7 +119,12 @@ const handleSubmit = async () => {
       }
       const success = await authStore.register(payload)
       if (success) {
-        router.push('/')
+        const redirectPath = route.query.redirect;
+        if (typeof redirectPath === 'string' && redirectPath) {
+          router.push(redirectPath);
+        } else {
+          router.push('/');
+        }
       }
     }
   } catch (error) {

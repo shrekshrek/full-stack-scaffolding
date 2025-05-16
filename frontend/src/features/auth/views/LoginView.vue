@@ -9,7 +9,7 @@
       
       <div class="mt-6 text-center">
         <span class="text-gray-600">还没有账户？</span>
-        <router-link to="/register" class="text-blue-500 hover:text-blue-700 font-medium">
+        <router-link :to="{ path: '/register', query: route.query.redirect ? { redirect: route.query.redirect } : {} }" class="text-blue-500 hover:text-blue-700 font-medium">
           立即注册
         </router-link>
       </div>
@@ -19,6 +19,10 @@
 
 <script setup lang="ts">
 import LoginForm from '@/features/auth/components/LoginForm.vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+
 // Removed unused imports: reactive, ref, useRouter, useAuthStore
 // Removed unused variables: loginData, loading, error, handleLoginSubmit
 </script>

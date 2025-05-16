@@ -47,33 +47,31 @@ const router = createRouter({
 
 // Optional: Global navigation guards
 router.beforeEach(async (to, from, next) => {
-  // Initialize the auth store here if it's not already initialized
-  // This is to ensure that the Pinia store is active before being used in the guard.
-  // Direct usage of useAuthStore() outside setup or lifecycle hooks might behave unexpectedly
-  // if Pinia isn't fully set up by the time the router is initialized.
-  // However, in most setups with main.ts properly creating and using Pinia, this should be fine.
-  const authStore = useAuthStore()
+  const authStore = useAuthStore();
 
-  // Fetch current user if not already loaded and has a token.
-  // This helps in cases where the user refreshes a page that requires auth.
-  if (authStore.accessToken && !authStore.currentUser && !authStore.isLoading) {
-    // Only fetch if not already loading to prevent multiple fetches on rapid navigation
-    await authStore.fetchCurrentUser()
+  // If there's an access token and current user is not set, ensure user data is loaded before proceeding.
+  // This await is crucial. It ensures that by the time we check isLoggedIn,
+  // a fetch attempt (if needed) has completed.
+  if (authStore.accessToken && !authStore.currentUser) {
+    await authStore.fetchCurrentUser();
   }
 
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
-  const guestOnly = to.matched.some((record) => record.meta.guest)
+  // Get the LATEST state of isLoggedIn *after* any potential await above.
+  const isLoggedIn = authStore.isLoggedIn;
 
-  if (requiresAuth && !authStore.isLoggedIn) {
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const guestOnly = to.matched.some((record) => record.meta.guest);
+
+  if (requiresAuth && !isLoggedIn) {
     // If route requires auth and user is not logged in, redirect to login
-    next({ name: 'Login', query: { redirect: to.fullPath } })
-  } else if (guestOnly && authStore.isLoggedIn) {
+    next({ name: 'Login', query: { redirect: to.fullPath } });
+  } else if (guestOnly && isLoggedIn) {
     // If route is for guests only (like login/register) and user is logged in, redirect to home
-    next({ name: 'Home' })
+    next({ name: 'Home' });
   } else {
     // Otherwise, proceed
-    next()
+    next();
   }
-})
+});
 
 export default router
