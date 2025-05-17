@@ -39,6 +39,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // 使用兼容版本sass 1.64.0，不需要特殊配置
+      }
+    }
+  },
   server: {
     port: 3000, // 开发服务器端口
     open: false, // 是否自动打开浏览器
