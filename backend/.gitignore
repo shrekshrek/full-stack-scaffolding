@@ -1,43 +1,40 @@
-# IDE specific files
-.idea/
-*.iml
-.vscode/*
-!.vscode/settings.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# Python cache and virtual environment files
+# Python 特有
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# 虚拟环境
 .venv/
-.env # Local environment variables, use .env.example as a template
-# .env.* # More specific local env files, if not meant to be versioned
-# !.env.example # Ensure example is not ignored if .env.* is broadly ignored
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# SQLite database files
-# Ignore all .db files in the project, especially in the db/ directory
-*.db
-*.db-journal # SQLite journal files
-/db/*.db
-/db/*.db-journal
+# PDM 特有
+.pdm-python
+.pdm.toml
+pdm.lock.orig
 
-# Build artifacts
+# 构建产物
 /dist/
 /build/
 *.egg-info/
+*.egg
 
-# Test reports
+# 测试报告
 htmlcov/
 .coverage
 
-# Logs
-logs/
-*.log
-
-# OS generated files
-.DS_Store
-Thumbs.db 
+# 数据库文件
+*.db
+*.db-journal
+*.sqlite3
+*.sqlite3-journal
+/db/*.db
+/db/*.db-journal 
